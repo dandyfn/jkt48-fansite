@@ -1,0 +1,23 @@
+# --- Backend API ---
+fastapi
+uvicorn[standard]
+sqlalchemy
+pydantic-settings
+python-multipart
+python-dotenv
+
+# --- Login admin (token JWT + hash password) ---
+pyjwt
+pwdlib[argon2]
+
+# --- Panggil API Instagram + jadwal otomatis mingguan ---
+requests
+apscheduler<4
+
+# --- Data & Machine Learning ---
+pandas
+scikit-learn
+joblib
+
+# --- Notebook untuk latihan ML di VS Code ---
+ipykernel
