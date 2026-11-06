@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>JKT48 Fan Board</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Nunito:wght@400;600;700;800&family=Zen+Maru+Gothic:wght@500;700;900&display=swap">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="halaman">
+  <!-- Corak bintang/hati/lingkaran merah, diisi oleh js/dekorasi.js -->
+  <div class="dekorasi" id="dekorasi" aria-hidden="true"></div>
+
+  <header class="navbar">
+    <div class="wadah navbar-isi">
+      <a href="#top" class="logo">
+        <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C12.8 7 17 11.2 24 12C17 12.8 12.8 17 12 24C11.2 17 7 12.8 0 12C7 11.2 11.2 7 12 0Z" fill="currentColor"/></svg>
+        JKT48 Fan Board
+      </a>
+      <nav aria-label="Navigasi utama" class="menu">
+        <a href="#leaderboard">Leaderboard</a>
+        <a href="#profil">Profil Grup</a>
+        <a href="#member">Member</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Muncul kalau API tidak bisa dihubungi -->
+  <div class="banner-error" id="banner-error" hidden>
+    <div class="wadah">
+      <strong>API belum menyala.</strong>
+      Nyalakan backend dulu (uvicorn di folder backend), lalu muat ulang halaman ini.
+    </div>
+  </div>
+
+  <main id="top">
+    <!-- ============ SECTION 1: LEADERBOARD ============ -->
+    <section id="leaderboard" class="wadah section">
+      <div class="judul-baris">
+        <div>
+          <p class="kicker">ランキング · LEADERBOARD</p>
+          <h1 class="judul-besar">Siapa yang paling bersinar <span id="kata-periode">minggu</span> ini?</h1>
+          <p class="teks-redup">
+            Skor dihitung dari projek baru, posisi center, show, projek luar, lencana, hasil SSK,
+            dan pertumbuhan follower. Periode: <strong id="label-periode">…</strong>
+          </p>
+        </div>
+        <div class="pil-grup" role="group" aria-label="Pilih periode">
+          <button type="button" class="pil aktif" data-periode="minggu">Mingguan</button>
+          <button type="button" class="pil" data-periode="bulan">Bulanan</button>
+        </div>
+      </div>
+
+      <div class="podium" id="podium"></div>
+
+      <h2 class="judul-sedang">Peringkat lainnya</h2>
+      <div class="grid-peringkat" id="peringkat-lain"></div>
+
+      <!-- Peringkat 13 ke bawah: tersembunyi sampai tombol diklik -->
+      <div class="grid-peringkat peringkat-tambahan" id="peringkat-tambahan" hidden></div>
+      <div class="baris-tombol">
+        <button type="button" class="tombol-utama" id="tombol-semua"
+                aria-expanded="false" aria-controls="peringkat-tambahan" hidden></button>
+      </div>
+      <p class="teks-redup kecil" id="status-leaderboard"></p>
+    </section>
+
+    <!-- ============ SECTION 2: PROFIL GRUP ============ -->
+    <section id="profil" class="section section-garis">
+      <div class="wadah">
+        <p class="kicker">プロフィール · PROFIL GRUP</p>
+        <h2 class="judul-section">Tentang <span id="nama-grup">JKT48</span></h2>
+
+        <div class="profil-baris">
+          <div class="profil-kiri">
+            <p class="deskripsi-grup" id="deskripsi-grup">Memuat…</p>
+            <div class="grid-statistik" id="statistik-grup"></div>
+
+            <div class="kotak">
+              <div class="pil-grup tanpa-bingkai" role="tablist" aria-label="Daftar rilisan">
+                <button type="button" class="pil aktif" role="tab" aria-selected="true" data-kategori="single">Single</button>
+                <button type="button" class="pil" role="tab" aria-selected="false" data-kategori="lagu">Lagu</button>
+              </div>
+              <ol class="daftar-rilis" id="daftar-rilis"></ol>
+            </div>
+          </div>
+
+          <div class="profil-kanan">
+            <div class="kartu-gelap" id="rilis-terbaru"></div>
+            <div class="kartu-pink" id="projek-terbaru"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECTION 3: BIODATA MEMBER ============ -->
+    <section id="member" class="wadah section">
+      <p class="kicker">メンバー · BIODATA MEMBER</p>
+      <div class="judul-baris">
+        <h2 class="judul-section">Kenalan dengan member</h2>
+        <div class="pil-grup tanpa-bingkai" role="group" aria-label="Filter status">
+          <button type="button" class="pil aktif" data-status="">Semua</button>
+          <button type="button" class="pil" data-status="aktif">Aktif</button>
+          <button type="button" class="pil" data-status="trainee">Trainee</button>
+          <button type="button" class="pil" data-status="eks">Eks</button>
+        </div>
+      </div>
+      <div class="baris-cari">
+        <div class="kotak-cari">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+          <label for="cari-member" class="sr-only">Cari member</label>
+          <input type="search" id="cari-member" placeholder="Cari nama member, kota, atau team…" autocomplete="off">
+        </div>
+        <p class="teks-redup kecil" id="info-cari" aria-live="polite" style="margin:0"></p>
+      </div>
+      <div class="grid-member" id="daftar-member"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wadah footer-isi">
+      <span class="logo-footer">JKT48 Fan Board</span>
+      <span>Fansite tidak resmi, dibuat oleh fans untuk fans. Hak cipta foto milik pemiliknya masing-masing.</span>
+    </div>
+  </footer>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/dekorasi.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

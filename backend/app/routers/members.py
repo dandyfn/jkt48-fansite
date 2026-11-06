@@ -5,19 +5,20 @@
 #   POST   /api/members        -> tambah member
 #   PUT    /api/members/{id}   -> ubah member
 #   DELETE /api/members/{id}   -> hapus member
+#   GET    /api/members/{id}/statistik -> total show, lagu, center, projek luar
 #
 # GET terbuka untuk umum (dipakai web user).
 # POST/PUT/DELETE dikunci: hanya admin yang sudah login (punya token).
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from .. import models
 from ..database import get_db
 from ..keamanan import admin_saja
-from ..schemas import MemberCreate, MemberOut, MemberUpdate
+from ..schemas import MemberCreate, MemberOut, MemberUpdate, StatistikMember
 
 router = APIRouter(prefix="/api/members", tags=["Member"])
 
@@ -83,3 +84,31 @@ def hapus_member(member_id: int, db: Session = Depends(get_db)):
             detail="Member masih punya data terkait (show, projek, dll). Ubah statusnya menjadi 'eks' saja.",
         )
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.get("/{member_id}/statistik", response_model=StatistikMember)
+def statistik_member(member_id: int, db: Session = Depends(get_db)):
+    """Total sepanjang karier = saldo awal (member_baseline) + yang tercatat di database."""
+    _ambil_atau_404(db, member_id)
+    MP, P = models.MemberProjek, models.Projek
+    awal = db.get(models.MemberBaseline, member_id)
+
+    def hitung(query) -> int:
+        return db.scalar(query) or 0
+
+    show = hitung(select(func.count()).select_from(models.ShowMember)
+                  .where(models.ShowMember.member_id == member_id))
+    lagu_jkt = ["single", "lagu", "projek_grup"]
+    lagu = hitung(select(func.count()).select_from(MP).join(P)
+                  .where(MP.member_id == member_id, P.kategori.in_(lagu_jkt)))
+    center = hitung(select(func.count()).select_from(MP).join(P)
+                    .where(MP.member_id == member_id, MP.is_center.is_(True),
+                           P.kategori.in_(lagu_jkt)))
+    luar = hitung(select(func.count()).select_from(MP).join(P)
+                  .where(MP.member_id == member_id, P.kategori.in_(["film", "iklan"])))
+    return {
+        "total_show": show + (awal.total_show_awal if awal else 0),
+        "total_lagu": lagu + (awal.total_lagu_awal if awal else 0),
+        "total_center": center + (awal.total_center_awal if awal else 0),
+        "projek_luar": luar,
+    }

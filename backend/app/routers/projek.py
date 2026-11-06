@@ -1,6 +1,6 @@
 # routers/projek.py
 # Single, lagu, projek grup, dan projek luar (film, iklan).
-#   GET    /api/projek          -> daftar projek (bisa filter kategori)
+#   GET    /api/projek          -> daftar projek (bisa filter kategori & member_id)
 #   GET    /api/projek/{id}     -> detail projek + peserta
 #   POST   /api/projek          -> tambah projek + otomatis catat poin peserta
 #   DELETE /api/projek/{id}     -> hapus projek + poinnya
@@ -19,10 +19,15 @@ router = APIRouter(prefix="/api/projek", tags=["Projek"])
 
 
 @router.get("", response_model=list[ProjekOut])
-def daftar_projek(kategori: str | None = None, db: Session = Depends(get_db)):
+def daftar_projek(kategori: str | None = None, member_id: int | None = None,
+                  batas: int | None = None, db: Session = Depends(get_db)):
     query = select(models.Projek).order_by(models.Projek.tanggal_rilis.desc())
     if kategori:
         query = query.where(models.Projek.kategori == kategori)
+    if member_id:
+        query = query.join(models.MemberProjek).where(models.MemberProjek.member_id == member_id)
+    if batas:
+        query = query.limit(batas)
     return db.scalars(query).all()
 
 

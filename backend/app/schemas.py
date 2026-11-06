@@ -59,6 +59,7 @@ class MemberOut(MemberBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
+    kapten: str | None = None   # terisi kalau sedang menjabat kapten, misal "Team Love"
 
     # Kolom hitungan: tidak ada di database, dihitung setiap kali dikirim
     @computed_field
@@ -253,6 +254,7 @@ class LeaderboardItem(BaseModel):
     generasi: int
     team: str | None
     foto_url: str | None
+    kapten: str | None = None
     skor: float
     rincian: dict[str, float]                 # contoh: {"show": 4, "center": 15}
     pertumbuhan_follower_persen: float | None
@@ -374,3 +376,43 @@ class RateCardItem(BaseModel):
     followers: int | None
     tanggal: date | None
     pertumbuhan_persen: float | None   # dibanding data sebelumnya
+
+
+# =====================================================================
+# PROFIL GRUP & STATISTIK MEMBER
+# =====================================================================
+
+class GrupInfo(BaseModel):
+    nama: str
+    deskripsi: str | None
+    tanggal_dibentuk: date | None
+    logo_url: str | None
+
+
+class GrupStatistik(BaseModel):
+    jumlah_single: int
+    jumlah_lagu: int
+    member_aktif: int
+    member_trainee: int
+    member_eks: int
+
+
+class GrupOut(BaseModel):
+    info: GrupInfo
+    statistik: GrupStatistik
+    rilis_terbaru: ProjekOut | None
+    projek_terbaru: ProjekOut | None
+
+
+class GrupUpdate(BaseModel):
+    nama: str | None = None
+    deskripsi: str | None = None
+    tanggal_dibentuk: date | None = None
+    logo_url: str | None = None
+
+
+class StatistikMember(BaseModel):
+    total_show: int
+    total_lagu: int
+    total_center: int
+    projek_luar: int

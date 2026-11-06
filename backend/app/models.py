@@ -44,6 +44,16 @@ class Member(Base):
     akun_sosmed: Mapped[list["AkunSosmed"]] = relationship(back_populates="member")
     aktivitas: Mapped[list["AktivitasMember"]] = relationship(back_populates="member")
 
+    @property
+    def kapten(self) -> str | None:
+        """Kalau sedang menjabat kapten, kembalikan keterangannya (misal 'Team Love')."""
+        hari_ini = date.today()
+        for l in self.lencana:
+            if (l.jenis == "kapten" and l.tanggal_mulai <= hari_ini
+                    and (l.tanggal_selesai is None or l.tanggal_selesai >= hari_ini)):
+                return l.keterangan or "Kapten"
+        return None
+
 
 class InfoGrup(Base):
     """Profil JKT48 untuk section 2. Biasanya hanya berisi 1 baris."""

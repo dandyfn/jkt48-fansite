@@ -51,6 +51,7 @@ def lihat_leaderboard(
             "generasi": m.generasi,
             "team": m.team,
             "foto_url": m.foto_url,
+            "kapten": m.kapten,
             "skor": r["skor"],
             "rincian": r["rincian"],
             "pertumbuhan_follower_persen": r["pertumbuhan_follower_persen"],

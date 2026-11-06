@@ -11,7 +11,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .penjadwal import hentikan_penjadwal, mulai_penjadwal
-from .routers import (aktivitas, aturan_poin, auth, leaderboard, lencana, members,
+from .routers import (aktivitas, aturan_poin, auth, grup, leaderboard, lencana, members,
                       projek, show, sosmed, ssk)
 
 
@@ -51,6 +51,7 @@ app.include_router(aktivitas.router)
 app.include_router(aturan_poin.router)
 app.include_router(leaderboard.router)
 app.include_router(sosmed.router)
+app.include_router(grup.router)
 
 
 @app.get("/", tags=["Umum"])
