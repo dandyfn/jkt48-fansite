@@ -9,7 +9,10 @@ class Settings(BaseSettings):
     # Nilai di kanan adalah nilai cadangan kalau tidak ada di .env
     secret_key: str = "dev-secret-ganti-di-env"
     admin_username: str = "admin"
-    admin_password: str = "admin"
+    # Password admin TIDAK disimpan apa adanya, tapi dalam bentuk hash.
+    # Buat hash-nya dengan: .venv\Scripts\python.exe buat_hash_password.py
+    admin_password_hash: str = ""
+    token_berlaku_menit: int = 480  # token login berlaku 8 jam
     database_url: str = "sqlite:///./data/jkt48.db"
     ig_user_id: str = ""
     ig_access_token: str = ""
