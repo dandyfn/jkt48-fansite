@@ -46,3 +46,8 @@ def hitung_lama(mulai: date | None, selesai: date | None = None) -> str | None:
     if tahun == 0:
         return f"{bulan} bulan"
     return f"{tahun} tahun {bulan} bulan"
+
+
+def poin_ssk(peringkat: int) -> float:
+    """Rumus SSK: (33 - peringkat) + bonus 10 untuk peringkat 1-16 (single utama)."""
+    return (33 - peringkat) + (10 if peringkat <= 16 else 0)

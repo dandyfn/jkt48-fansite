@@ -75,3 +75,201 @@ class MemberOut(MemberBase):
     @property
     def lama_di_jkt48(self) -> str | None:
         return hitung_lama(self.tanggal_bergabung, self.tanggal_lulus)
+
+
+# =====================================================================
+# PROJEK (single, lagu, projek grup, film, iklan)
+# =====================================================================
+
+KategoriProjek = Literal["single", "lagu", "projek_grup", "film", "iklan"]
+
+
+class PesertaProjekIn(BaseModel):
+    member_id: int
+    is_center: bool = False
+
+
+class PesertaProjekOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    member_id: int
+    nama_panggilan: str
+    is_center: bool
+
+
+class ProjekCreate(BaseModel):
+    judul: str = Field(min_length=1, max_length=150)
+    kategori: KategoriProjek
+    tanggal_rilis: date
+    deskripsi: str | None = None
+    cover_url: str | None = None
+    peserta: list[PesertaProjekIn] = []
+
+
+class ProjekOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    judul: str
+    kategori: str
+    tanggal_rilis: date
+    deskripsi: str | None
+    cover_url: str | None
+    peserta: list[PesertaProjekOut]
+
+
+# =====================================================================
+# SHOW
+# =====================================================================
+
+class ShowCreate(BaseModel):
+    nama: str = Field(min_length=1, max_length=150)
+    tanggal: date
+    lokasi: str | None = None
+    member_ids: list[int] = Field(min_length=1)
+
+
+class PesertaShowOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    member_id: int
+    nama_panggilan: str
+
+
+class ShowOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    nama: str
+    tanggal: date
+    lokasi: str | None
+    peserta: list[PesertaShowOut]
+
+
+# =====================================================================
+# SSK (pemilihan member)
+# =====================================================================
+
+class HasilSskIn(BaseModel):
+    member_id: int
+    peringkat: int = Field(ge=1, le=32)
+
+
+class HasilSskOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    member_id: int
+    nama_panggilan: str
+    peringkat: int
+    poin: float
+
+
+class SskCreate(BaseModel):
+    judul: str = Field(min_length=1, max_length=150)
+    tanggal_pengumuman: date
+    projek_id: int | None = None
+    hasil: list[HasilSskIn] = Field(min_length=1, max_length=32)
+
+
+class SskOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    judul: str
+    tanggal_pengumuman: date
+    projek_id: int | None
+    hasil: list[HasilSskOut]
+
+
+# =====================================================================
+# LENCANA (kapten, wakil kapten, dll)
+# =====================================================================
+
+JenisLencana = Literal["kapten", "wakil_kapten", "lainnya"]
+
+
+class LencanaCreate(BaseModel):
+    member_id: int
+    jenis: JenisLencana
+    keterangan: str | None = None       # contoh: "Team Love"
+    tanggal_mulai: date
+    tanggal_selesai: date | None = None
+
+
+class LencanaUpdate(BaseModel):
+    keterangan: str | None = None
+    tanggal_mulai: date | None = None
+    tanggal_selesai: date | None = None
+
+
+class LencanaOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    member_id: int
+    nama_panggilan: str
+    jenis: str
+    keterangan: str | None
+    tanggal_mulai: date
+    tanggal_selesai: date | None
+
+    @computed_field
+    @property
+    def masih_menjabat(self) -> bool:
+        return self.tanggal_selesai is None
+
+
+# =====================================================================
+# ATURAN POIN & AKTIVITAS
+# =====================================================================
+
+class JenisPoinOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    kode: str
+    nama: str
+    poin: float
+    keterangan: str | None
+
+
+class JenisPoinUpdate(BaseModel):
+    nama: str | None = None
+    poin: float | None = Field(default=None, ge=0)
+    keterangan: str | None = None
+
+
+class AktivitasOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    member_id: int
+    nama_panggilan: str
+    jenis_kode: str
+    tanggal: date
+    nilai: float | None
+    poin: float
+    keterangan: str | None
+
+
+# =====================================================================
+# LEADERBOARD
+# =====================================================================
+
+class LeaderboardItem(BaseModel):
+    peringkat: int
+    member_id: int
+    nama_panggilan: str
+    generasi: int
+    team: str | None
+    foto_url: str | None
+    skor: float
+    rincian: dict[str, float]                 # contoh: {"show": 4, "center": 15}
+    pertumbuhan_follower_persen: float | None
+    streak_minggu: int                         # minggu berturut-turut di Top 5
+    perubahan_peringkat: int | None            # + naik, - turun, None = belum ada data lalu
+
+
+class LeaderboardOut(BaseModel):
+    periode: str
+    mulai: date
+    selesai: date
+    data: list[LeaderboardItem]
+
+
+class RiwayatSkorOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    periode_mulai: date
+    periode_selesai: date
+    skor: float
+    peringkat: int

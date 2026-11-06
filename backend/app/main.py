@@ -8,7 +8,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .routers import auth, members
+from .routers import (aktivitas, aturan_poin, auth, leaderboard, lencana, members,
+                      projek, show, ssk)
 
 app = FastAPI(
     title="JKT48 Fan Board API",
@@ -28,6 +29,13 @@ app.add_middleware(
 # Daftarkan kelompok endpoint
 app.include_router(auth.router)
 app.include_router(members.router)
+app.include_router(projek.router)
+app.include_router(show.router)
+app.include_router(ssk.router)
+app.include_router(lencana.router)
+app.include_router(aktivitas.router)
+app.include_router(aturan_poin.router)
+app.include_router(leaderboard.router)
 
 
 @app.get("/", tags=["Umum"])

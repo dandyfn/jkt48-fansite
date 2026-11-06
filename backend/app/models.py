@@ -12,6 +12,7 @@ from sqlalchemy import (Boolean, Date, DateTime, Float, ForeignKey, Integer,
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .database import Base
+from .utils import poin_ssk
 
 
 # =====================================================================
@@ -79,6 +80,10 @@ class Lencana(Base):
 
     member: Mapped["Member"] = relationship(back_populates="lencana")
 
+    @property
+    def nama_panggilan(self) -> str:
+        return self.member.nama_panggilan
+
 
 # =====================================================================
 # 2. PROJEK, SHOW, SSK
@@ -95,7 +100,9 @@ class Projek(Base):
     deskripsi: Mapped[str | None] = mapped_column(Text)
     cover_url: Mapped[str | None] = mapped_column(String(255))
 
-    peserta: Mapped[list["MemberProjek"]] = relationship(back_populates="projek")
+    # cascade: kalau projek dihapus, daftar pesertanya ikut terhapus
+    peserta: Mapped[list["MemberProjek"]] = relationship(
+        back_populates="projek", cascade="all, delete-orphan")
 
 
 class MemberProjek(Base):
@@ -107,6 +114,11 @@ class MemberProjek(Base):
     is_center: Mapped[bool] = mapped_column(Boolean, default=False)
 
     projek: Mapped["Projek"] = relationship(back_populates="peserta")
+    member: Mapped["Member"] = relationship()
+
+    @property
+    def nama_panggilan(self) -> str:
+        return self.member.nama_panggilan
 
 
 class Show(Base):
@@ -117,6 +129,8 @@ class Show(Base):
     tanggal: Mapped[date] = mapped_column(Date)
     lokasi: Mapped[str | None] = mapped_column(String(100))
 
+    peserta: Mapped[list["ShowMember"]] = relationship(cascade="all, delete-orphan")
+
 
 class ShowMember(Base):
     """Member yang tampil di sebuah show."""
@@ -124,6 +138,12 @@ class ShowMember(Base):
 
     show_id: Mapped[int] = mapped_column(ForeignKey("show.id"), primary_key=True)
     member_id: Mapped[int] = mapped_column(ForeignKey("members.id"), primary_key=True)
+
+    member: Mapped["Member"] = relationship()
+
+    @property
+    def nama_panggilan(self) -> str:
+        return self.member.nama_panggilan
 
 
 class SskEvent(Base):
@@ -135,6 +155,9 @@ class SskEvent(Base):
     tanggal_pengumuman: Mapped[date] = mapped_column(Date)
     projek_id: Mapped[int | None] = mapped_column(ForeignKey("projek.id"))  # diisi setelah lagunya rilis
 
+    hasil: Mapped[list["SskHasil"]] = relationship(
+        cascade="all, delete-orphan", order_by="SskHasil.peringkat")
+
 
 class SskHasil(Base):
     __tablename__ = "ssk_hasil"
@@ -142,6 +165,16 @@ class SskHasil(Base):
     ssk_event_id: Mapped[int] = mapped_column(ForeignKey("ssk_event.id"), primary_key=True)
     member_id: Mapped[int] = mapped_column(ForeignKey("members.id"), primary_key=True)
     peringkat: Mapped[int] = mapped_column(Integer)     # 1 - 32
+
+    member: Mapped["Member"] = relationship()
+
+    @property
+    def nama_panggilan(self) -> str:
+        return self.member.nama_panggilan
+
+    @property
+    def poin(self) -> float:
+        return poin_ssk(self.peringkat)
 
 
 # =====================================================================
@@ -172,8 +205,16 @@ class AktivitasMember(Base):
     nilai: Mapped[float | None] = mapped_column(Float)   # contoh: peringkat SSK
     poin: Mapped[float] = mapped_column(Float)           # poin yang didapat
     keterangan: Mapped[str | None] = mapped_column(String(200))
+    # Asal aktivitas, contoh: sumber_tabel="show", sumber_id=12.
+    # Dipakai supaya kalau show #12 dihapus, poinnya ikut terhapus.
+    sumber_tabel: Mapped[str | None] = mapped_column(String(30))
+    sumber_id: Mapped[int | None] = mapped_column(Integer)
 
     member: Mapped["Member"] = relationship(back_populates="aktivitas")
+
+    @property
+    def nama_panggilan(self) -> str:
+        return self.member.nama_panggilan
 
 
 class SkorLeaderboard(Base):
