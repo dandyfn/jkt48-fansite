@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard · Admin JKT48 Fan Board</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Nunito:wght@400;600;700;800&family=Zen+Maru+Gothic:wght@500;700;900&display=swap">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body data-halaman="dashboard">
+<div class="tata-letak">
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <main class="konten">
+    <header class="kepala-halaman">
+      <div>
+        <p class="sapaan" id="sapaan">Halo</p>
+        <h1>Dashboard</h1>
+      </div>
+      <a href="member.html" class="tombol tombol-merah">+ Tambah member</a>
+    </header>
+
+    <section class="grid-ringkas" id="ringkasan" aria-label="Ringkasan"></section>
+
+    <div class="dua-kolom">
+      <section class="panel">
+        <div class="panel-kepala">
+          <h2>Top 5 minggu ini</h2>
+          <span class="redup kecil" id="periode-top"></span>
+        </div>
+        <ol class="daftar-top" id="top5"><li class="redup">Memuat…</li></ol>
+      </section>
+
+      <section class="panel">
+        <div class="panel-kepala"><h2>Rutinitas mingguan</h2></div>
+        <ol class="daftar-rutinitas">
+          <li><a href="aktivitas.html#show"><strong>Input show</strong></a> minggu ini</li>
+          <li><a href="aktivitas.html#projek"><strong>Input projek</strong></a>, <a href="aktivitas.html#ssk"><strong>SSK</strong></a>, <a href="aktivitas.html#lencana"><strong>lencana</strong></a> kalau ada</li>
+          <li><a href="follower.html"><strong>Input follower TikTok</strong></a> (dan IG yang manual)</li>
+          <li><a href="pengaturan.html#leaderboard"><strong>Simpan leaderboard</strong></a> minggu lalu</li>
+        </ol>
+        <p class="redup kecil" id="info-follower"></p>
+      </section>
+    </div>
+
+    <section class="panel">
+      <div class="panel-kepala"><h2>Poin terbaru yang tercatat</h2></div>
+      <div class="bungkus-tabel">
+        <table class="tabel">
+          <thead><tr><th>Tanggal</th><th>Member</th><th>Jenis</th><th>Keterangan</th><th class="kanan">Poin</th></tr></thead>
+          <tbody id="aktivitas-terbaru"><tr><td colspan="5" class="redup">Memuat…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="js/api-admin.js"></script>
+<script src="js/layout.js"></script>
+<script src="js/dashboard.js"></script>
+</body>
+</html>

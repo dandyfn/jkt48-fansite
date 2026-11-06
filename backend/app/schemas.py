@@ -210,7 +210,8 @@ class LencanaOut(BaseModel):
     @computed_field
     @property
     def masih_menjabat(self) -> bool:
-        return self.tanggal_selesai is None
+        # Berakhir PADA tanggal_selesai (sama dengan aturan bingkai kapten)
+        return self.tanggal_selesai is None or self.tanggal_selesai > date.today()
 
 
 # =====================================================================
@@ -416,3 +417,23 @@ class StatistikMember(BaseModel):
     total_lagu: int
     total_center: int
     projek_luar: int
+
+
+# =====================================================================
+# SALDO AWAL KARIER (member_baseline)
+# =====================================================================
+
+class BaselineIn(BaseModel):
+    tanggal_cutoff: date
+    total_show_awal: int = Field(default=0, ge=0)
+    total_lagu_awal: int = Field(default=0, ge=0)
+    total_center_awal: int = Field(default=0, ge=0)
+
+
+class BaselineOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    member_id: int
+    tanggal_cutoff: date | None
+    total_show_awal: int
+    total_lagu_awal: int
+    total_center_awal: int

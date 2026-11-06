@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login Admin · JKT48 Fan Board</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Nunito:wght@400;600;700;800&family=Zen+Maru+Gothic:wght@500;700;900&display=swap">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body class="halaman-login">
+  <main class="kotak-login">
+    <div class="logo-login">
+      <svg width="40" height="40" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C12.8 7 17 11.2 24 12C17 12.8 12.8 17 12 24C11.2 17 7 12.8 0 12C7 11.2 11.2 7 12 0Z" fill="currentColor"/></svg>
+    </div>
+    <h1>Masuk ke Admin</h1>
+    <p class="redup">JKT48 Fan Board</p>
+
+    <p class="pesan-login" id="pesan-login" role="alert" hidden></p>
+
+    <form id="form-login" novalidate>
+      <label for="username">Username</label>
+      <input id="username" name="username" autocomplete="username" required>
+
+      <label for="password">Password</label>
+      <div class="baris-password">
+        <input id="password" name="password" type="password" autocomplete="current-password" required>
+        <button type="button" class="tombol-lihat" id="tombol-lihat" aria-label="Tampilkan password" aria-pressed="false">Lihat</button>
+      </div>
+
+      <button type="submit" class="tombol tombol-merah tombol-penuh" id="tombol-masuk">Masuk</button>
+    </form>
+    <a href="../web-user/index.html" class="tautan-kecil">← Kembali ke web user</a>
+  </main>
+
+  <script src="js/api-admin.js"></script>
+  <script src="js/login.js"></script>
+</body>
+</html>

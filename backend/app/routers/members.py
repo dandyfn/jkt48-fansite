@@ -6,21 +6,25 @@
 #   PUT    /api/members/{id}   -> ubah member
 #   DELETE /api/members/{id}   -> hapus member
 #   GET    /api/members/{id}/statistik -> total show, lagu, center, projek luar
+#   GET/PUT /api/members/{id}/baseline -> saldo awal karier (sebelum mulai dicatat)
 #
 # GET terbuka untuk umum (dipakai web user).
 # POST/PUT/DELETE dikunci: hanya admin yang sudah login (punya token).
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from .. import models
 from ..database import get_db
 from ..keamanan import admin_saja
-from ..schemas import MemberCreate, MemberOut, MemberUpdate, StatistikMember
+from ..schemas import (BaselineIn, BaselineOut, MemberCreate, MemberOut, MemberUpdate,
+                       StatistikMember)
 
 router = APIRouter(prefix="/api/members", tags=["Member"])
+
+KOLOM_WAJIB = {"nama_lengkap", "nama_panggilan", "generasi", "status"}
 
 
 def _ambil_atau_404(db: Session, member_id: int) -> models.Member:
@@ -64,6 +68,8 @@ def ubah_member(member_id: int, data: MemberUpdate, db: Session = Depends(get_db
     member = _ambil_atau_404(db, member_id)
     # exclude_unset: hanya kolom yang benar-benar dikirim yang diubah
     for kolom, nilai in data.model_dump(exclude_unset=True).items():
+        if nilai is None and kolom in KOLOM_WAJIB:
+            continue  # kolom wajib tidak boleh dikosongkan
         setattr(member, kolom, nilai)
     db.commit()
     db.refresh(member)
@@ -74,6 +80,8 @@ def ubah_member(member_id: int, data: MemberUpdate, db: Session = Depends(get_db
                dependencies=[Depends(admin_saja)])
 def hapus_member(member_id: int, db: Session = Depends(get_db)):
     member = _ambil_atau_404(db, member_id)
+    # Saldo awal ikut dihapus (tidak berarti apa-apa tanpa member-nya)
+    db.execute(delete(models.MemberBaseline).where(models.MemberBaseline.member_id == member_id))
     db.delete(member)
     try:
         db.commit()
@@ -112,3 +120,28 @@ def statistik_member(member_id: int, db: Session = Depends(get_db)):
         "total_center": center + (awal.total_center_awal if awal else 0),
         "projek_luar": luar,
     }
+
+
+@router.get("/{member_id}/baseline", response_model=BaselineOut)
+def lihat_baseline(member_id: int, db: Session = Depends(get_db)):
+    _ambil_atau_404(db, member_id)
+    awal = db.get(models.MemberBaseline, member_id)
+    if awal is None:
+        return {"member_id": member_id, "tanggal_cutoff": None, "total_show_awal": 0,
+                "total_lagu_awal": 0, "total_center_awal": 0}
+    return awal
+
+
+@router.put("/{member_id}/baseline", response_model=BaselineOut,
+            dependencies=[Depends(admin_saja)])
+def simpan_baseline(member_id: int, data: BaselineIn, db: Session = Depends(get_db)):
+    _ambil_atau_404(db, member_id)
+    awal = db.get(models.MemberBaseline, member_id)
+    if awal is None:
+        awal = models.MemberBaseline(member_id=member_id)
+        db.add(awal)
+    for kolom, nilai in data.model_dump().items():
+        setattr(awal, kolom, nilai)
+    db.commit()
+    db.refresh(awal)
+    return awal

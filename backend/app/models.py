@@ -46,11 +46,12 @@ class Member(Base):
 
     @property
     def kapten(self) -> str | None:
-        """Kalau sedang menjabat kapten, kembalikan keterangannya (misal 'Team Love')."""
+        """Kalau sedang menjabat kapten, kembalikan keterangannya (misal 'Team Love').
+        Jabatan dianggap sudah berakhir PADA tanggal_selesai."""
         hari_ini = date.today()
         for l in self.lencana:
             if (l.jenis == "kapten" and l.tanggal_mulai <= hari_ini
-                    and (l.tanggal_selesai is None or l.tanggal_selesai >= hari_ini)):
+                    and (l.tanggal_selesai is None or l.tanggal_selesai > hari_ini)):
                 return l.keterangan or "Kapten"
         return None
 

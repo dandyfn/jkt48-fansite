@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Input Aktivitas · Admin JKT48 Fan Board</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Nunito:wght@400;600;700;800&family=Zen+Maru+Gothic:wght@500;700;900&display=swap">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body data-halaman="aktivitas">
+<div class="tata-letak">
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <main class="konten">
+    <header class="kepala-halaman">
+      <div>
+        <p class="sapaan" id="sapaan">Halo</p>
+        <h1>Input Aktivitas</h1>
+      </div>
+    </header>
+
+    <div class="tab-baris" role="tablist" aria-label="Jenis aktivitas">
+      <button type="button" role="tab" class="tab aktif" aria-selected="true" aria-controls="tab-show" id="t-show">Show</button>
+      <button type="button" role="tab" class="tab" aria-selected="false" aria-controls="tab-projek" id="t-projek" tabindex="-1">Projek</button>
+      <button type="button" role="tab" class="tab" aria-selected="false" aria-controls="tab-ssk" id="t-ssk" tabindex="-1">SSK</button>
+      <button type="button" role="tab" class="tab" aria-selected="false" aria-controls="tab-lencana" id="t-lencana" tabindex="-1">Lencana</button>
+    </div>
+
+    <!-- ===================== SHOW ===================== -->
+    <section role="tabpanel" id="tab-show" aria-labelledby="t-show" class="isi-tab">
+      <form class="panel" id="form-show" novalidate>
+        <div class="panel-kepala"><h2>Tambah show</h2><span class="redup kecil">Setiap member yang tampil mendapat poin show</span></div>
+        <div class="grid-form tiga">
+          <div class="isian"><label for="show-nama">Nama setlist / acara <span class="wajib">*</span></label>
+            <input id="show-nama" list="daftar-setlist" required><datalist id="daftar-setlist"></datalist></div>
+          <div class="isian"><label for="show-tanggal">Tanggal <span class="wajib">*</span></label><input id="show-tanggal" type="date" required></div>
+          <div class="isian"><label for="show-lokasi">Lokasi</label><input id="show-lokasi" placeholder="Teater"></div>
+        </div>
+        <div class="baris-tombol-kiri">
+          <button type="button" class="tombol-kecil" id="show-lineup-lalu">Pakai lineup show terakhir</button>
+        </div>
+        <div id="pemilih-show"></div>
+        <div class="kaki-form"><button type="submit" class="tombol tombol-merah">Simpan show</button></div>
+      </form>
+
+      <section class="panel">
+        <div class="panel-kepala"><h2>Show terbaru</h2></div>
+        <div class="bungkus-tabel"><table class="tabel">
+          <thead><tr><th>Tanggal</th><th>Setlist</th><th>Member tampil</th><th class="kanan">Aksi</th></tr></thead>
+          <tbody id="tabel-show"></tbody>
+        </table></div>
+      </section>
+    </section>
+
+    <!-- ===================== PROJEK ===================== -->
+    <section role="tabpanel" id="tab-projek" aria-labelledby="t-projek" class="isi-tab" hidden>
+      <form class="panel" id="form-projek" novalidate>
+        <div class="panel-kepala"><h2>Tambah projek</h2><span class="redup kecil" id="info-poin-projek"></span></div>
+        <div class="grid-form tiga">
+          <div class="isian"><label for="projek-judul">Judul <span class="wajib">*</span></label><input id="projek-judul" required></div>
+          <div class="isian"><label for="projek-kategori">Kategori <span class="wajib">*</span></label>
+            <select id="projek-kategori">
+              <option value="single">Single</option><option value="lagu">Lagu</option><option value="projek_grup">Projek grup</option>
+              <option value="film">Film (projek luar)</option><option value="iklan">Iklan (projek luar)</option>
+            </select></div>
+          <div class="isian"><label for="projek-tanggal">Tanggal rilis <span class="wajib">*</span></label><input id="projek-tanggal" type="date" required></div>
+          <div class="isian lebar-2"><label for="projek-deskripsi">Deskripsi</label><input id="projek-deskripsi"></div>
+          <div class="isian"><label for="projek-cover">Link cover</label><input id="projek-cover" type="url" placeholder="https://…"></div>
+        </div>
+        <div id="pemilih-projek"></div>
+        <div class="kaki-form"><button type="submit" class="tombol tombol-merah">Simpan projek</button></div>
+      </form>
+
+      <section class="panel">
+        <div class="panel-kepala"><h2>Projek terbaru</h2></div>
+        <div class="bungkus-tabel"><table class="tabel">
+          <thead><tr><th>Tanggal</th><th>Judul</th><th>Kategori</th><th>Peserta</th><th class="kanan">Aksi</th></tr></thead>
+          <tbody id="tabel-projek"></tbody>
+        </table></div>
+      </section>
+    </section>
+
+    <!-- ===================== SSK ===================== -->
+    <section role="tabpanel" id="tab-ssk" aria-labelledby="t-ssk" class="isi-tab" hidden>
+      <form class="panel" id="form-ssk" novalidate>
+        <div class="panel-kepala"><h2>Input hasil SSK</h2><span class="redup kecil">Poin = (33 − peringkat) + 10 untuk peringkat 1–16</span></div>
+        <div class="grid-form tiga">
+          <div class="isian"><label for="ssk-judul">Judul SSK / lagu <span class="wajib">*</span></label><input id="ssk-judul" required></div>
+          <div class="isian"><label for="ssk-tanggal">Tanggal pengumuman <span class="wajib">*</span></label><input id="ssk-tanggal" type="date" required></div>
+          <div class="isian"><label for="ssk-projek">Tautkan ke projek (opsional)</label><select id="ssk-projek"><option value="">–</option></select></div>
+        </div>
+        <p class="redup kecil">Isi peringkat yang ada saja. Baris yang dibiarkan kosong tidak dikirim.</p>
+        <div class="grid-ssk" id="baris-ssk"></div>
+        <div class="kaki-form"><button type="submit" class="tombol tombol-merah">Simpan hasil SSK</button></div>
+      </form>
+
+      <section class="panel">
+        <div class="panel-kepala"><h2>Riwayat SSK</h2></div>
+        <div class="bungkus-tabel"><table class="tabel">
+          <thead><tr><th>Diumumkan</th><th>Judul</th><th>Top 3</th><th>Peserta</th><th class="kanan">Aksi</th></tr></thead>
+          <tbody id="tabel-ssk"></tbody>
+        </table></div>
+      </section>
+    </section>
+
+    <!-- ===================== LENCANA ===================== -->
+    <section role="tabpanel" id="tab-lencana" aria-labelledby="t-lencana" class="isi-tab" hidden>
+      <form class="panel" id="form-lencana" novalidate>
+        <div class="panel-kepala"><h2>Tambah lencana</h2><span class="redup kecil">Kapten baru mendapat poin "diangkat kapten" + poin mingguan selama menjabat</span></div>
+        <div class="grid-form tiga">
+          <div class="isian"><label for="lencana-member">Member <span class="wajib">*</span></label><select id="lencana-member" required></select></div>
+          <div class="isian"><label for="lencana-jenis">Jenis <span class="wajib">*</span></label>
+            <select id="lencana-jenis"><option value="kapten">Kapten</option><option value="wakil_kapten">Wakil kapten</option><option value="lainnya">Lainnya</option></select></div>
+          <div class="isian"><label for="lencana-keterangan">Keterangan</label><input id="lencana-keterangan" list="daftar-ket-lencana" placeholder="Team Love">
+            <datalist id="daftar-ket-lencana"><option value="Team Love"><option value="Team Dream"><option value="Team Passion"></datalist></div>
+          <div class="isian"><label for="lencana-mulai">Mulai menjabat <span class="wajib">*</span></label><input id="lencana-mulai" type="date" required></div>
+          <div class="isian"><label for="lencana-selesai">Selesai menjabat</label><input id="lencana-selesai" type="date"></div>
+        </div>
+        <div class="kaki-form"><button type="submit" class="tombol tombol-merah">Simpan lencana</button></div>
+      </form>
+
+      <section class="panel">
+        <div class="panel-kepala"><h2>Semua lencana</h2></div>
+        <div class="bungkus-tabel"><table class="tabel">
+          <thead><tr><th>Member</th><th>Lencana</th><th>Periode</th><th>Status</th><th class="kanan">Aksi</th></tr></thead>
+          <tbody id="tabel-lencana"></tbody>
+        </table></div>
+      </section>
+    </section>
+  </main>
+</div>
+
+<script src="js/api-admin.js"></script>
+<script src="js/layout.js"></script>
+<script src="js/pemilih.js"></script>
+<script src="js/aktivitas.js"></script>
+</body>
+</html>

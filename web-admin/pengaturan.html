@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pengaturan · Admin JKT48 Fan Board</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Nunito:wght@400;600;700;800&family=Zen+Maru+Gothic:wght@500;700;900&display=swap">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body data-halaman="pengaturan">
+<div class="tata-letak">
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <main class="konten">
+    <header class="kepala-halaman">
+      <div>
+        <p class="sapaan" id="sapaan">Halo</p>
+        <h1>Pengaturan</h1>
+      </div>
+    </header>
+
+    <!-- ===================== LEADERBOARD ===================== -->
+    <section class="panel" id="leaderboard">
+      <div class="panel-kepala"><h2>Simpan leaderboard</h2></div>
+      <p class="redup kecil" style="margin:0">
+        Leaderboard di web user selalu dihitung langsung. Menyimpannya membuat <strong>riwayat</strong>
+        untuk grafik "skor 8 minggu terakhir" dan bahan <strong>machine learning</strong>.
+        Simpan setiap awal minggu untuk minggu yang baru selesai.
+      </p>
+      <div class="baris-tombol-kiri">
+        <button type="button" class="tombol tombol-merah" id="simpan-minggu-lalu">Simpan minggu lalu</button>
+        <button type="button" class="tombol tombol-garis" id="simpan-bulan-lalu">Simpan bulan lalu</button>
+      </div>
+      <details class="lipatan">
+        <summary>Simpan rentang tanggal (untuk mengisi riwayat ke belakang)</summary>
+        <form id="form-rentang" class="grid-form empat" novalidate>
+          <div class="isian"><label for="rentang-periode">Periode</label>
+            <select id="rentang-periode"><option value="minggu">Mingguan</option><option value="bulan">Bulanan</option></select></div>
+          <div class="isian"><label for="rentang-dari">Dari</label><input type="date" id="rentang-dari"></div>
+          <div class="isian"><label for="rentang-sampai">Sampai</label><input type="date" id="rentang-sampai"></div>
+          <div class="isian"><span class="label-kosong" aria-hidden="true">&nbsp;</span><button type="submit" class="tombol tombol-garis">Simpan rentang</button></div>
+        </form>
+      </details>
+      <p class="kotak-info" id="hasil-simpan" hidden></p>
+    </section>
+
+    <div class="dua-kolom">
+      <!-- ===================== ATURAN POIN ===================== -->
+      <section class="panel">
+        <div class="panel-kepala"><h2>Aturan poin</h2></div>
+        <p class="redup kecil" style="margin:0">Mengubah nilai poin juga menghitung ulang poin lama dengan jenis yang sama, supaya leaderboard tetap adil.</p>
+        <div class="bungkus-tabel">
+          <table class="tabel">
+            <thead><tr><th>Jenis</th><th class="kanan">Poin</th><th></th></tr></thead>
+            <tbody id="tabel-aturan"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ===================== PROFIL GRUP ===================== -->
+      <form class="panel" id="form-grup" novalidate>
+        <div class="panel-kepala"><h2>Profil grup</h2><span class="redup kecil">Tampil di section 2 web user</span></div>
+        <div class="isian"><label for="grup-nama">Nama grup</label><input id="grup-nama"></div>
+        <div class="isian"><label for="grup-tanggal">Tanggal dibentuk</label><input id="grup-tanggal" type="date"></div>
+        <div class="isian"><label for="grup-logo">Link logo</label><input id="grup-logo" type="url" placeholder="https://…"></div>
+        <div class="isian"><label for="grup-deskripsi">Deskripsi</label><textarea id="grup-deskripsi" rows="6"></textarea></div>
+        <div class="kaki-form"><button type="submit" class="tombol tombol-merah">Simpan profil</button></div>
+      </form>
+    </div>
+  </main>
+</div>
+
+<script src="js/api-admin.js"></script>
+<script src="js/layout.js"></script>
+<script src="js/pengaturan.js"></script>
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Member · Admin JKT48 Fan Board</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Nunito:wght@400;600;700;800&family=Zen+Maru+Gothic:wght@500;700;900&display=swap">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body data-halaman="member">
+<div class="tata-letak">
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <main class="konten">
+    <header class="kepala-halaman">
+      <div>
+        <p class="sapaan" id="sapaan">Halo</p>
+        <h1>Kelola Member</h1>
+      </div>
+      <button type="button" class="tombol tombol-merah" id="tombol-tambah">+ Tambah member</button>
+    </header>
+
+    <section class="panel">
+      <div class="alat-tabel">
+        <div class="kotak-cari">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+          <label for="cari" class="sr-only">Cari member</label>
+          <input type="search" id="cari" placeholder="Cari nama, kota, atau team…" autocomplete="off">
+        </div>
+        <label for="filter-status" class="sr-only">Filter status</label>
+        <select id="filter-status">
+          <option value="">Semua status</option>
+          <option value="aktif">Aktif</option>
+          <option value="trainee">Trainee</option>
+          <option value="eks">Eks</option>
+        </select>
+        <span class="redup kecil" id="jumlah-member" aria-live="polite"></span>
+      </div>
+
+      <div class="bungkus-tabel">
+        <table class="tabel">
+          <thead>
+            <tr>
+              <th>Member</th><th>Gen</th><th>Team</th><th>Status</th><th>Umur</th><th>Di JKT48</th>
+              <th class="kanan">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="tabel-member"><tr><td colspan="7" class="redup">Memuat…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ================= FORM TAMBAH / EDIT MEMBER ================= -->
+<dialog class="dialog" id="dialog-member" aria-labelledby="judul-dialog">
+  <form id="form-member" novalidate>
+    <header class="dialog-kepala">
+      <h2 id="judul-dialog">Tambah member</h2>
+      <button type="button" class="tombol-x" data-tutup aria-label="Tutup">×</button>
+    </header>
+
+    <div class="dialog-isi">
+      <p class="pesan-form" id="pesan-form" role="alert" hidden></p>
+
+      <fieldset>
+        <legend>Identitas</legend>
+        <div class="grid-form">
+          <div class="isian"><label for="f-nama_lengkap">Nama lengkap <span class="wajib">*</span></label><input id="f-nama_lengkap" name="nama_lengkap" required></div>
+          <div class="isian"><label for="f-nama_panggilan">Nama panggilan <span class="wajib">*</span></label><input id="f-nama_panggilan" name="nama_panggilan" required></div>
+          <div class="isian"><label for="f-stage_name">Stage name</label><input id="f-stage_name" name="stage_name"></div>
+          <div class="isian"><label for="f-foto_url">Link foto</label><input id="f-foto_url" name="foto_url" type="url" placeholder="https://…"></div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Data diri</legend>
+        <div class="grid-form">
+          <div class="isian"><label for="f-tempat_lahir">Tempat lahir</label><input id="f-tempat_lahir" name="tempat_lahir"></div>
+          <div class="isian"><label for="f-tanggal_lahir">Tanggal lahir</label><input id="f-tanggal_lahir" name="tanggal_lahir" type="date"></div>
+          <div class="isian"><label for="f-hometown">Hometown</label><input id="f-hometown" name="hometown"></div>
+          <div class="isian"><label for="f-tinggi_cm">Tinggi (cm)</label><input id="f-tinggi_cm" name="tinggi_cm" type="number" min="100" max="220"></div>
+          <div class="isian"><label for="f-golongan_darah">Golongan darah</label>
+            <select id="f-golongan_darah" name="golongan_darah"><option value="">–</option><option>A</option><option>B</option><option>AB</option><option>O</option></select></div>
+        </div>
+        <p class="redup kecil">Umur dan zodiak dihitung otomatis dari tanggal lahir.</p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Keanggotaan</legend>
+        <div class="grid-form">
+          <div class="isian"><label for="f-generasi">Generasi <span class="wajib">*</span></label><input id="f-generasi" name="generasi" type="number" min="1" required></div>
+          <div class="isian"><label for="f-team">Team</label>
+            <input id="f-team" name="team" list="daftar-team" placeholder="Kosongkan untuk trainee">
+            <datalist id="daftar-team"><option value="Love"><option value="Dream"><option value="Passion"></datalist></div>
+          <div class="isian"><label for="f-status">Status <span class="wajib">*</span></label>
+            <select id="f-status" name="status"><option value="aktif">Aktif</option><option value="trainee">Trainee</option><option value="eks">Eks</option></select></div>
+          <div class="isian"><label for="f-tanggal_bergabung">Tanggal bergabung</label><input id="f-tanggal_bergabung" name="tanggal_bergabung" type="date"></div>
+          <div class="isian"><label for="f-tanggal_lulus">Tanggal lulus</label><input id="f-tanggal_lulus" name="tanggal_lulus" type="date"></div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Saldo awal karier <span class="redup">(opsional)</span></legend>
+        <p class="redup kecil">Total sebelum kamu mulai mencatat di web ini. Sistem akan menambahkan show/lagu baru di atas angka ini.</p>
+        <div class="grid-form">
+          <div class="isian"><label for="b-tanggal_cutoff">Per tanggal</label><input id="b-tanggal_cutoff" type="date"></div>
+          <div class="isian"><label for="b-total_show_awal">Total show</label><input id="b-total_show_awal" type="number" min="0"></div>
+          <div class="isian"><label for="b-total_lagu_awal">Total lagu/projek</label><input id="b-total_lagu_awal" type="number" min="0"></div>
+          <div class="isian"><label for="b-total_center_awal">Total center</label><input id="b-total_center_awal" type="number" min="0"></div>
+        </div>
+      </fieldset>
+    </div>
+
+    <footer class="dialog-kaki">
+      <button type="button" class="tombol tombol-garis" data-tutup>Batal</button>
+      <button type="submit" class="tombol tombol-merah" id="tombol-simpan">Simpan</button>
+    </footer>
+  </form>
+</dialog>
+
+<script src="js/api-admin.js"></script>
+<script src="js/layout.js"></script>
+<script src="js/member.js"></script>
+</body>
+</html>
