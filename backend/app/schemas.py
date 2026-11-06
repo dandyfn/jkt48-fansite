@@ -7,7 +7,7 @@
 from datetime import date
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, computed_field
+from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator
 
 from .utils import hitung_lama, hitung_umur, hitung_zodiak
 
@@ -273,3 +273,104 @@ class RiwayatSkorOut(BaseModel):
     periode_selesai: date
     skor: float
     peringkat: int
+
+
+# =====================================================================
+# MEDIA SOSIAL
+# =====================================================================
+
+Platform = Literal["instagram", "tiktok", "x", "youtube"]
+SumberData = Literal["api", "manual"]
+
+_LINK_PROFIL = {
+    "instagram": "https://www.instagram.com/{}/",
+    "tiktok": "https://www.tiktok.com/@{}",
+    "x": "https://x.com/{}",
+    "youtube": "https://www.youtube.com/@{}",
+}
+
+
+class AkunSosmedCreate(BaseModel):
+    member_id: int
+    platform: Platform
+    username: str = Field(min_length=1, max_length=80)
+    sumber: SumberData = "manual"
+    aktif: bool = True
+
+    @field_validator("username")
+    @classmethod
+    def _buang_at(cls, v: str) -> str:
+        return v.strip().lstrip("@")   # "@hana.jkt48" -> "hana.jkt48"
+
+
+class AkunSosmedUpdate(BaseModel):
+    username: str | None = None
+    sumber: SumberData | None = None
+    aktif: bool | None = None
+
+
+class AkunSosmedOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    member_id: int
+    nama_panggilan: str
+    platform: str
+    username: str
+    sumber: str
+    aktif: bool
+    follower_terakhir: int | None
+    tanggal_terakhir: date | None
+
+    @computed_field
+    @property
+    def link_profil(self) -> str:
+        return _LINK_PROFIL.get(self.platform, "{}").format(self.username)
+
+    @computed_field
+    @property
+    def perlu_update(self) -> bool:
+        """True kalau belum pernah diisi atau data terakhir lebih dari 7 hari lalu."""
+        if self.tanggal_terakhir is None:
+            return True
+        return (date.today() - self.tanggal_terakhir).days > 7
+
+
+class SnapshotOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    tanggal: date
+    followers: int
+
+
+class IsiFollowerIn(BaseModel):
+    akun_id: int
+    followers: int = Field(ge=0)
+
+
+class SnapshotMassalIn(BaseModel):
+    tanggal: date = Field(default_factory=date.today)
+    data: list[IsiFollowerIn] = Field(min_length=1)
+
+
+class PeringatanFollower(BaseModel):
+    akun_id: int
+    nama_panggilan: str
+    platform: str
+    sebelumnya: int
+    sekarang: int
+    perubahan_persen: float
+
+
+class SnapshotMassalOut(BaseModel):
+    baru: int
+    diperbarui: int
+    peringatan: list[PeringatanFollower]
+
+
+class RateCardItem(BaseModel):
+    platform: str
+    username: str
+    link_profil: str
+    sumber: str
+    followers: int | None
+    tanggal: date | None
+    pertumbuhan_persen: float | None   # dibanding data sebelumnya

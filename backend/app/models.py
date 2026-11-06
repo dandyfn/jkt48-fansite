@@ -246,7 +246,21 @@ class AkunSosmed(Base):
     aktif: Mapped[bool] = mapped_column(Boolean, default=True)
 
     member: Mapped["Member"] = relationship(back_populates="akun_sosmed")
-    snapshot: Mapped[list["SnapshotSosmed"]] = relationship(back_populates="akun")
+    # Diurutkan dari tanggal terlama -> terbaru. Ikut terhapus kalau akun dihapus.
+    snapshot: Mapped[list["SnapshotSosmed"]] = relationship(
+        back_populates="akun", cascade="all, delete-orphan", order_by="SnapshotSosmed.tanggal")
+
+    @property
+    def nama_panggilan(self) -> str:
+        return self.member.nama_panggilan
+
+    @property
+    def follower_terakhir(self) -> int | None:
+        return self.snapshot[-1].followers if self.snapshot else None
+
+    @property
+    def tanggal_terakhir(self) -> date | None:
+        return self.snapshot[-1].tanggal if self.snapshot else None
 
 
 class SnapshotSosmed(Base):

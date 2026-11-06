@@ -5,16 +5,30 @@
 #   .venv\Scripts\python.exe -m uvicorn app.main:app --reload
 # Lalu buka: http://127.0.0.1:8000/docs
 
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from .penjadwal import hentikan_penjadwal, mulai_penjadwal
 from .routers import (aktivitas, aturan_poin, auth, leaderboard, lencana, members,
-                      projek, show, ssk)
+                      projek, show, sosmed, ssk)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Dijalankan SEKALI saat API menyala ...
+    mulai_penjadwal()
+    yield
+    # ... dan sekali saat API dimatikan
+    hentikan_penjadwal()
+
 
 app = FastAPI(
     title="JKT48 Fan Board API",
     description="Backend untuk web user dan web admin fansite JKT48.",
     version="0.1.0",
+    lifespan=lifespan,
 )
 
 # CORS: izinkan web-user & web-admin (dibuka lewat Live Server) memanggil API ini.
@@ -36,6 +50,7 @@ app.include_router(lencana.router)
 app.include_router(aktivitas.router)
 app.include_router(aturan_poin.router)
 app.include_router(leaderboard.router)
+app.include_router(sosmed.router)
 
 
 @app.get("/", tags=["Umum"])
