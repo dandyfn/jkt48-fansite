@@ -179,7 +179,8 @@ legend { font-weight: 800; padding: 0 6px; }
 .pemilih-petunjuk { margin: 0; }
 .chip-filter { min-height: 34px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--garis); background: #fff; font-family: inherit; font-weight: 700; font-size: 13px; cursor: pointer; color: var(--tinta); }
 .chip-filter.aktif { background: var(--tinta); color: #fff; border-color: var(--tinta); }
-.pemilih-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; max-height: 360px; overflow-y: auto; padding: 2px; }
+.pemilih-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); grid-auto-rows: max-content; gap: 8px; max-height: 360px; overflow-y: auto; padding: 2px; }
+/* grid-auto-rows: max-content -> baris tidak ikut diperas saat member banyak (dulu nama terpotong) */
 .item-pilih { display: flex; border: 1.5px solid var(--garis); border-radius: 12px; background: #fff; overflow: hidden; }
 .item-pilih.dipilih { border-color: var(--merah); background: #FFF0F2; }
 .item-pilih.center { border-color: #C9962B; background: #FFF8E1; }
