@@ -2,7 +2,7 @@
 // Mengisi halaman utama dengan data dari API:
 //   Section 1 -> GET /api/leaderboard
 //   Section 2 -> GET /api/grup  dan  GET /api/projek?kategori=...
-//   Section 3 -> GET /api/members?status=...
+//   (Biodata member pindah ke member.html -> js/member.js)
 
 // ======================================================================
 // SECTION 1: LEADERBOARD
@@ -23,17 +23,25 @@ async function muatLeaderboard(periode) {
     return;
   }
 
-  document.getElementById("kata-periode").textContent = periode === "minggu" ? "minggu" : "bulan";
+  const KATA = { minggu: "minggu ini", bulan: "bulan ini", karier: "sepanjang karier" };
+  document.getElementById("kata-periode").textContent = KATA[periode];
   document.getElementById("label-periode").textContent =
-    periode === "minggu"
-      ? `${tanggal(hasil.mulai, { day: "numeric", month: "short" })} – ${tanggal(hasil.selesai)}`
-      : tanggal(hasil.mulai, { month: "long", year: "numeric" });
+    periode === "minggu" ? `${tanggal(hasil.mulai, { day: "numeric", month: "short" })} – ${tanggal(hasil.selesai)}`
+    : periode === "bulan" ? tanggal(hasil.mulai, { month: "long", year: "numeric" })
+    : `sepanjang karier, termasuk total lagu & center sebelum April 2026`;
 
   const data = hasil.data;
   if (data.length === 0 || data.every((d) => d.skor === 0)) {
-    podium.innerHTML = `<p class="memuat">Belum ada poin di periode ini.</p>`;
+    podium.innerHTML = `
+      <div class="memuat">
+        <p>Belum ada poin di periode ini, karena data show &amp; projek baru belum diinput.</p>
+        ${periode !== "karier" ? `<button type="button" class="tombol-semua" id="ke-karier">Lihat peringkat sepanjang karier</button>` : ""}
+      </div>`;
+    const ke = document.getElementById("ke-karier");
+    if (ke) ke.addEventListener("click", () => document.querySelector('[data-periode="karier"]').click());
     status.textContent = "";
-    return;
+    aturTombolSemua(0, 0);
+    return false;
   }
 
   // Podium: urutan tampil 2 - 1 - 3 (juara 1 di tengah)
@@ -42,13 +50,14 @@ async function muatLeaderboard(periode) {
   podium.innerHTML = urutanTampil.map((m) => kartuPodium(m, data.indexOf(m), periode)).join("");
 
   // Peringkat 4-12 selalu tampil; 13 ke bawah disembunyikan di balik tombol
-  lainnya.innerHTML = data.slice(3, JUMLAH_DEFAULT).map((m, i) => kartuPeringkat(m, i + 3)).join("");
+  lainnya.innerHTML = data.slice(3, JUMLAH_DEFAULT).map((m, i) => kartuPeringkat(m, i + 3, periode)).join("");
   const sisa = data.slice(JUMLAH_DEFAULT);
   document.getElementById("peringkat-tambahan").innerHTML =
-    sisa.map((m, i) => kartuPeringkat(m, i + JUMLAH_DEFAULT)).join("");
+    sisa.map((m, i) => kartuPeringkat(m, i + JUMLAH_DEFAULT, periode)).join("");
   aturTombolSemua(sisa.length, data.length);
 
   status.textContent = `${data.length} member aktif & trainee ikut dihitung.`;
+  return true;
 }
 
 // Berapa peringkat yang tampil tanpa menekan tombol
@@ -83,7 +92,7 @@ function kartuPodium(m, indeks, periode) {
   const mahkota = posisi === 1
     ? `<span class="bintang-periode">
          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F6E7B8" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 18h18l-2-11-5 5-2-7-2 7-5-5z"/></svg>
-         Bintang ${periode} ini
+         ${periode === "karier" ? "Bintang sepanjang karier" : `Bintang ${periode} ini`}
        </span>`
     : "";
   return `
@@ -106,14 +115,16 @@ function kartuPodium(m, indeks, periode) {
           <div class="label-poin">poin</div>
         </div>
       </div>
+      ${periode === "karier" ? "" : `
       <div class="podium-bawah">
         <span class="streak">${IKON_STREAK} Streak ${m.streak_minggu} minggu</span>
         ${htmlPerubahan(m.perubahan_peringkat)}
-      </div>
+      </div>`}
     </a>`;
 }
 
-function kartuPeringkat(m, indeks) {
+function kartuPeringkat(m, indeks, periode) {
+  const karier = periode === "karier";
   return `
     <a class="kartu-peringkat" href="detail.html?id=${m.member_id}">
       <span class="nomor">${m.peringkat}</span>
@@ -121,11 +132,11 @@ function kartuPeringkat(m, indeks) {
       <div class="tengah">
         <span class="nama">${esc(m.nama_panggilan)}</span>
         <span class="sub">Gen ${esc(m.generasi)} · ${esc(m.team || "Trainee")}</span>
-        <span class="streak" style="font-size:13px;font-weight:700">${IKON_STREAK} ${m.streak_minggu} minggu</span>
+        ${karier ? "" : `<span class="streak" style="font-size:13px;font-weight:700">${IKON_STREAK} ${m.streak_minggu} minggu</span>`}
       </div>
       <div>
         <div class="skor">${angka(m.skor)}</div>
-        <div class="ubah">${htmlPerubahan(m.perubahan_peringkat)}</div>
+        <div class="ubah">${karier ? "poin" : htmlPerubahan(m.perubahan_peringkat)}</div>
       </div>
     </a>`;
 }
@@ -203,112 +214,15 @@ async function muatDaftarRilis(kategori) {
 }
 
 // ======================================================================
-// SECTION 3: BIODATA MEMBER
-// ======================================================================
-
-// Data member yang sudah diambil dari API (sesuai filter status).
-// Pencarian menyaring daftar ini langsung di browser, tanpa memanggil API lagi.
-let semuaMember = [];
-
-async function muatMember(status) {
-  const grid = document.getElementById("daftar-member");
-  grid.innerHTML = `<p class="memuat">Memuat member…</p>`;
-  try {
-    semuaMember = await ambil(status ? `/api/members?status=${status}` : "/api/members");
-  } catch (e) {
-    semuaMember = [];
-    grid.innerHTML = `<p class="memuat">Data member gagal dimuat.</p>`;
-    return;
-  }
-  tampilkanMember();
-}
-
-function tampilkanMember() {
-  const grid = document.getElementById("daftar-member");
-  const info = document.getElementById("info-cari");
-  const kata = document.getElementById("cari-member").value.trim().toLowerCase();
-
-  // Cocokkan kata kunci dengan nama panggilan, nama lengkap, stage name, kota, dan team
-  const hasil = kata
-    ? semuaMember.filter((m) =>
-        [m.nama_panggilan, m.nama_lengkap, m.stage_name, m.hometown, m.tempat_lahir, m.team]
-          .some((teks) => teks && teks.toLowerCase().includes(kata)))
-    : semuaMember;
-
-  info.textContent = kata
-    ? `Menampilkan ${hasil.length} dari ${semuaMember.length} member untuk "${kata}"`
-    : `${semuaMember.length} member`;
-
-  if (hasil.length === 0) {
-    grid.innerHTML = semuaMember.length === 0
-      ? `<p class="memuat">Belum ada member dengan status ini.</p>`
-      : `<p class="memuat">Tidak ada member yang cocok dengan "${esc(kata)}".</p>`;
-    return;
-  }
-  grid.innerHTML = hasil.map(kartuMember).join("");
-}
-
-// Setiap kali isi kotak pencarian berubah, saring ulang
-document.getElementById("cari-member").addEventListener("input", tampilkanMember);
-
-function kartuMember(m, indeks) {
-  const lahir = [m.tempat_lahir, m.tanggal_lahir ? tanggal(m.tanggal_lahir) : null].filter(Boolean).join(", ");
-  const baris = [
-    ["Lahir", lahir || "–"],
-    ["Hometown", m.hometown || "–"],
-    ["Umur", m.umur !== null ? m.umur + " tahun" : "–"],
-    ["Zodiak", m.zodiak || "–"],
-    ["Tinggi", m.tinggi_cm ? m.tinggi_cm + " cm" : "–"],
-    ["Gol. darah", m.golongan_darah || "–"],
-    ["Generasi", "Gen " + m.generasi],
-    ["Team", m.team || "–"],
-  ];
-  return `
-    <article class="kartu-member">
-      <div class="atas">
-        ${htmlFoto(m, indeks)}
-        <div style="display:flex;flex-direction:column;gap:6px;min-width:0">
-          <span class="chip status-${esc(m.status)}" style="align-self:flex-start">${esc(m.status[0].toUpperCase() + m.status.slice(1))}</span>
-          <span class="nama">${esc(m.nama_panggilan)}</span>
-          <span class="nama-lengkap">${esc(m.nama_lengkap)}</span>
-          ${m.nama_jepang ? `<span class="nama-jepang" lang="ja">${esc(m.nama_jepang)}</span>` : ""}
-          ${m.kapten ? `<span class="chip ikon-emas" style="align-self:flex-start">Kapten ${esc(m.kapten)}</span>` : ""}
-          <span style="font-size:13px;color:var(--redup)">${m.lama_di_jkt48 ? "Di JKT48 " + esc(m.lama_di_jkt48) : ""}</span>
-        </div>
-      </div>
-      ${m.jiko ? `<blockquote class="jiko"><span class="label-jiko">Jiko</span>${esc(m.jiko)}</blockquote>` : ""}
-      <dl>
-        ${baris.map(([dt, dd]) => `<div><dt>${dt}</dt><dd>${esc(dd)}</dd></div>`).join("")}
-      </dl>
-    </article>`;
-}
-
-// ======================================================================
-// TOMBOL-TOMBOL PIL (periode, tab rilis, filter status)
-// ======================================================================
-
-function pasangPil(selector, atribut, saatDipilih) {
-  const tombol = document.querySelectorAll(selector);
-  tombol.forEach((t) => {
-    t.addEventListener("click", () => {
-      tombol.forEach((x) => {
-        x.classList.toggle("aktif", x === t);
-        if (x.hasAttribute("aria-selected")) x.setAttribute("aria-selected", x === t);
-      });
-      saatDipilih(t.dataset[atribut]);
-    });
-  });
-}
-
-// ======================================================================
 // MULAI
 // ======================================================================
 
 pasangPil("[data-periode]", "periode", muatLeaderboard);
 pasangPil("[data-kategori]", "kategori", muatDaftarRilis);
-pasangPil("[data-status]", "status", muatMember);
 
-muatLeaderboard("minggu");
+// Buka mingguan dulu; kalau minggu ini belum ada poin sama sekali, pindah ke "Karier"
+muatLeaderboard("minggu").then((ada) => {
+  if (ada === false) document.querySelector('[data-periode="karier"]').click();
+});
 muatProfilGrup();
 muatDaftarRilis("single");
-muatMember("");

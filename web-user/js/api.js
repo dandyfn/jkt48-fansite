@@ -63,9 +63,12 @@ const IKON_MAHKOTA_KECIL =
 //   ukuran: "besar" (podium, detail, biodata) atau "kecil" (daftar peringkat -> hanya ikon mahkota)
 function htmlFoto(member, indeks, ukuran = "besar") {
   const tint = "tint-" + (indeks % 4);
+  const inisial = esc((member.nama_panggilan || "?")[0]);
+  // Kalau link foto rusak/diblokir (onerror), gambar disembunyikan dan huruf awal yang tampil
   const isi = member.foto_url
-    ? `<img src="${esc(member.foto_url)}" alt="Foto ${esc(member.nama_panggilan)}" loading="lazy" referrerpolicy="no-referrer">`
-    : `<span class="inisial" aria-hidden="true">${esc((member.nama_panggilan || "?")[0])}</span>`;
+    ? `<img src="${esc(member.foto_url)}" alt="Foto ${esc(member.nama_panggilan)}" loading="lazy" referrerpolicy="no-referrer"
+          onerror="this.hidden=true;this.nextElementSibling.hidden=false"><span class="inisial" aria-hidden="true" hidden>${inisial}</span>`
+    : `<span class="inisial" aria-hidden="true">${inisial}</span>`;
   const foto = `<div class="foto ${tint}">${isi}</div>`;
   if (!member.kapten) return foto;
 
@@ -85,3 +88,21 @@ function htmlPerubahan(nilai) {
 
 const IKON_STREAK =
   `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E0457F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22c4 0 7-3 7-7 0-4-3-6-4-9-1 2-2 3-4 3 0-2 0-4-2-7-1 4-6 7-6 13 0 4 3 7 9 7z"/></svg>`;
+
+// ======================================================================
+// TOMBOL-TOMBOL PIL (dipakai main.js & member.js)
+// ======================================================================
+
+function pasangPil(selector, atribut, saatDipilih) {
+  const tombol = document.querySelectorAll(selector);
+  tombol.forEach((t) => {
+    t.addEventListener("click", () => {
+      tombol.forEach((x) => {
+        x.classList.toggle("aktif", x === t);
+        if (x.hasAttribute("aria-selected")) x.setAttribute("aria-selected", x === t);
+      });
+      saatDipilih(t.dataset[atribut]);
+    });
+  });
+}
+

@@ -307,3 +307,132 @@ main, .footer { position: relative; z-index: 1; }
 /* Nama Jepang & jiko di halaman detail */
 .detail-nama-jepang { margin: 4px 0 0; font-size: 18px; font-weight: 700; color: var(--merah); letter-spacing: .05em; }
 .detail-jiko { font-size: 16px; max-width: 640px; }
+
+/* =====================================================================
+   HALAMAN INFOGRAFIS (infografis.html)
+   ===================================================================== */
+.menu a[aria-current="page"] { background: var(--tinta); color: var(--putih); }
+.info { display: flex; flex-direction: column; gap: 56px; padding-bottom: 80px; }
+.info .merah { color: var(--merah); }
+.info-h2 { margin: 4px 0 0; font-family: var(--font-judul); font-weight: 900; font-size: 30px; }
+.info-judul { margin-bottom: 20px; align-items: baseline; }
+.info-keterangan { margin: 0; font-size: 14px; font-weight: 600; color: var(--redup); }
+.info-kaki { text-align: center; }
+
+/* Pilihan cakupan */
+.info-filter { margin-top: 28px; display: flex; flex-direction: column; gap: 16px; padding: 20px 24px; background: var(--putih); border: 1px solid var(--garis); border-radius: 24px; box-shadow: 0 12px 32px rgba(163,36,90,.06); }
+.info-filter-baris { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
+.info-filter-baris .info-keterangan { margin-left: auto; font-weight: 700; }
+.info-label { font-weight: 800; font-size: 15px; }
+.info-gen { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 16px; border-top: 1px dashed var(--garis); }
+.tombol-gen { min-height: 44px; min-width: 76px; padding: 4px 14px; border: 1px solid var(--garis); border-radius: 14px; background: var(--putih); color: var(--tinta); font-family: var(--font-teks); font-weight: 800; font-size: 14px; cursor: pointer; display: flex; flex-direction: column; align-items: center; line-height: 1.2; }
+.tombol-gen small { font-size: 11px; font-weight: 700; opacity: .8; }
+.tombol-gen:hover { background: var(--pink-muda); }
+.tombol-gen.aktif { background: var(--merah); border-color: var(--merah); color: var(--putih); }
+.tombol-gen:focus-visible { outline: 3px solid var(--merah); outline-offset: 2px; }
+
+/* Kartu juara: 3 per baris di layar lebar */
+.grid-juara { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 20px; }
+.kartu-juara { display: flex; flex-direction: column; gap: 16px; padding: 20px; background: var(--putih); border: 1px solid var(--garis); border-radius: 26px; box-shadow: 0 12px 32px rgba(163,36,90,.06); }
+.juara-kepala { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; }
+.juara-ikon { width: 44px; height: 44px; flex-shrink: 0; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
+.juara-judul { flex: 1 1 160px; min-width: 0; }
+.juara-judul h3 { margin: 0; font-family: var(--font-judul); font-weight: 900; font-size: 18px; }
+.juara-judul p { margin: 0; font-size: 13px; color: var(--redup); font-weight: 600; }
+.label-menunggu { padding: 4px 10px; border-radius: 999px; background: #FFF4D6; color: #6B4E00; font-size: 12px; font-weight: 800; white-space: nowrap; }
+.pil-kecil .pil { min-height: 44px; padding: 0 14px; font-size: 13px; }
+
+.juara-utama { display: flex; gap: 14px; align-items: center; padding: 14px; border-radius: 20px; background: #FFF5F8; text-decoration: none; color: var(--tinta); }
+.juara-utama:hover { background: #FDEBF2; color: var(--tinta); }
+.juara-utama.kosong { background: #FAF6F8; }
+.juara-foto { position: relative; width: 72px; height: 90px; flex-shrink: 0; }
+.juara-foto .foto, .juara-foto .bingkai-kapten { width: 100%; height: 100%; border-radius: 16px; }
+.juara-foto .foto .inisial { font-size: 34px; }
+.kosong .juara-foto .foto { background: #EFE7EB; }
+.medali-kecil { position: absolute; top: -8px; left: -8px; width: 32px; height: 32px; border-radius: 999px; background: #F6E7B8; color: #5C4300; border: 3px solid var(--putih); display: flex; align-items: center; justify-content: center; font-family: var(--font-angka); font-size: 16px; }
+.juara-teks { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.juara-mahkota { font-size: 11px; font-weight: 800; letter-spacing: .1em; color: var(--merah); }
+.juara-nama { font-family: var(--font-judul); font-weight: 900; font-size: 22px; line-height: 1.1; overflow-wrap: anywhere; }
+.kosong .juara-nama { font-size: 18px; color: var(--redup); }
+.juara-meta { font-size: 13px; font-weight: 700; color: var(--redup); }
+.juara-angka { text-align: right; }
+.juara-angka strong { display: block; font-family: var(--font-angka); font-weight: 400; font-size: 38px; line-height: 1; color: var(--merah); }
+.juara-angka span { font-size: 13px; font-weight: 800; color: var(--redup); }
+
+.daftar-top { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.daftar-top li { display: grid; grid-template-columns: 24px 84px 1fr 40px; align-items: center; gap: 10px; }
+.daftar-top .nomor { font-family: var(--font-angka); font-size: 20px; color: var(--redup); text-align: center; }
+.daftar-top .nama { font-weight: 800; font-size: 15px; color: var(--tinta); text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.daftar-top a.nama:hover { color: var(--merah); }
+.daftar-top .trek { height: 12px; border-radius: 999px; background: #F7EAF0; overflow: hidden; }
+.daftar-top .isi { display: block; height: 100%; border-radius: 999px; background: #F2A7BC; }
+.daftar-top .isi.utama { background: var(--merah); }
+.daftar-top li.kosong .isi { background: #E9DDE3; }
+.daftar-top .nilai { text-align: right; font-weight: 800; font-size: 15px; }
+.kartu-catatan { margin: 0; padding-top: 12px; border-top: 1px dashed var(--garis); font-size: 13px; color: var(--redup); }
+
+/* Grafik per generasi */
+.grid-dua { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 480px), 1fr)); gap: 20px; }
+.grid-tiga { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 20px; margin-top: 20px; }
+.kartu-grafik { display: flex; flex-direction: column; gap: 16px; padding: 24px; background: var(--putih); border: 1px solid var(--garis); border-radius: 28px; }
+.grafik-kepala { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.grafik-kepala h3 { margin: 0; font-family: var(--font-judul); font-weight: 900; font-size: 20px; }
+.grafik-kepala p { margin: 0; font-size: 13px; color: var(--redup); font-weight: 600; }
+.grafik-angka { text-align: right; }
+.grafik-angka strong { display: block; font-family: var(--font-angka); font-weight: 400; font-size: 32px; line-height: 1; color: var(--merah); }
+.grafik-angka span { font-size: 12px; font-weight: 800; color: var(--redup); }
+
+/* Batang vertikal */
+.vb-area { display: flex; gap: 10px; }
+.vb-sumbu { width: 32px; height: 240px; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; font-size: 12px; font-weight: 700; color: var(--redup); line-height: 1; }
+.vb-kanan { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.vb-baris { height: 240px; display: flex; align-items: flex-end; gap: 8px; border-bottom: 2px solid #EBD9E2; background-image: linear-gradient(#F3E6EC 1px, transparent 1px); }
+.vb { flex: 1; min-width: 0; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 4px; }
+.vb-nilai { font-size: 12px; font-weight: 800; white-space: nowrap; }
+.vb-isi { width: 100%; max-width: 40px; border-radius: 10px 10px 2px 2px; background: #E8879F; }
+.vb.redup .vb-isi { background: #F4CBD7; }
+.vb.aktif .vb-isi { background: var(--merah); }
+.vb.aktif .vb-nilai { color: var(--merah); }
+.vb-label { display: flex; gap: 8px; }
+.vb-label span { flex: 1; min-width: 0; text-align: center; font-size: 12px; font-weight: 700; line-height: 1.3; }
+.vb-label small { display: block; font-size: 11px; color: var(--redup); }
+.vb-label .aktif { color: var(--merah); font-weight: 900; }
+
+/* Diagram lingkaran (donat) */
+.donat { position: relative; width: 220px; height: 220px; margin: 0 auto; border-radius: 999px; }
+.donat-tengah { position: absolute; inset: 44px; border-radius: 999px; background: var(--putih); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; line-height: 1.15; }
+.donat-tengah strong { font-family: var(--font-angka); font-weight: 400; font-size: 36px; }
+.donat-tengah.sorot strong { color: var(--merah); }
+.donat-tengah span { font-size: 12px; font-weight: 800; color: var(--redup); }
+.legenda { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; }
+.legenda li { display: flex; align-items: center; gap: 8px; padding: 4px 8px; border-radius: 10px; font-size: 13px; }
+.legenda li.aktif { background: #FCE4EE; }
+.legenda .warna { width: 12px; height: 12px; flex-shrink: 0; border-radius: 4px; }
+.legenda .gen { flex: 1; font-weight: 700; }
+.legenda li.aktif .gen { font-weight: 900; }
+.legenda .nilai { font-weight: 800; }
+.legenda .persen { width: 36px; text-align: right; color: var(--redup); font-weight: 700; }
+.legenda .gen { white-space: nowrap; }
+@media (max-width: 480px) {
+  .legenda { grid-template-columns: 1fr; }
+  .vb-label small { display: none; }   /* "8 org" disembunyikan di HP supaya label tidak berdesakan */
+}
+
+/* Infografis: tombol "Lihat semua" & jendela peringkat lengkap */
+.kartu-juara .kartu-catatan { flex: 1; }
+.tombol-lengkap { min-height: 44px; display: flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid var(--garis); border-radius: 999px; background: var(--putih); color: var(--tinta); font-family: var(--font-teks); font-weight: 800; font-size: 14px; cursor: pointer; }
+.tombol-lengkap:hover { background: var(--pink-muda); }
+.tombol-lengkap:focus-visible, .tombol-tutup:focus-visible { outline: 3px solid var(--merah); outline-offset: 2px; }
+.tombol-lengkap:disabled { cursor: default; color: var(--redup); background: #FAF6F8; }
+.dialog-peringkat { width: min(640px, calc(100% - 32px)); max-height: 85vh; padding: 0; border: 0; border-radius: 28px; color: var(--tinta); font-family: var(--font-teks); box-shadow: 0 24px 64px rgba(43,27,51,.25); }
+.dialog-peringkat::backdrop { background: rgba(43,27,51,.45); }
+.dialog-kepala { position: sticky; top: 0; z-index: 1; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; padding: 24px 24px 16px; background: var(--putih); border-bottom: 1px dashed var(--garis); }
+.dialog-kepala h2 { margin: 2px 0; font-family: var(--font-judul); font-weight: 900; font-size: 24px; }
+.dialog-kepala .juara-mahkota { margin: 0; }
+.tombol-tutup { width: 44px; height: 44px; flex-shrink: 0; border: 1px solid var(--garis); border-radius: 999px; background: var(--putih); color: var(--tinta); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.tombol-tutup:hover { background: var(--pink-muda); }
+.daftar-lengkap { padding: 16px 24px 24px; gap: 12px; }
+.daftar-lengkap li { grid-template-columns: 28px 130px 1fr 72px; }
+.daftar-lengkap .nama small { display: block; font-size: 12px; font-weight: 700; color: var(--redup); }
+.daftar-lengkap .nilai small { font-size: 12px; font-weight: 700; color: var(--redup); }
+.legenda-member .gen { overflow: hidden; text-overflow: ellipsis; }

@@ -5,6 +5,7 @@
 # Cara jalan (dari folder backend):
 #   .venv\Scripts\python.exe buat_tabel.py
 
+from datetime import date
 from pathlib import Path
 
 from sqlalchemy import inspect, text
@@ -61,6 +62,15 @@ def main():
             if db.get(models.JenisPoin, kode) is None:
                 db.add(models.JenisPoin(kode=kode, nama=nama, poin=poin, keterangan=ket))
                 baru += 1
+
+        # Profil grup awal (hanya kalau belum ada). Bisa diubah dari web admin -> Pengaturan.
+        if db.query(models.InfoGrup).first() is None:
+            db.add(models.InfoGrup(
+                nama="JKT48", tanggal_dibentuk=date(2011, 9, 11),
+                deskripsi=("Idol group asal Jakarta yang dibentuk pada 2011 sebagai sister group "
+                           "pertama AKB48 di luar Jepang. Mengusung konsep idol yang bisa ditemui, "
+                           "JKT48 rutin tampil di JKT48 Theater, fX Sudirman, Jakarta.")))
+            print("Profil grup awal ditambahkan.")
         db.commit()
 
     # 3) Tampilkan hasilnya

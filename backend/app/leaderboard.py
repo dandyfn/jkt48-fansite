@@ -6,6 +6,9 @@
 #   + poin kapten aktif   (per minggu selama menjabat)
 #   + poin follower       (pertumbuhan % dibanding pertumbuhan tertinggi, maks 30)
 #
+# Periode "karier" = sepanjang karier: saldo awal (total show/lagu/center sebelum
+# tanggal cutoff, diisi dari Excel) dikali poinnya, ditambah SEMUA aktivitas yang tercatat.
+#
 # Streak = berapa minggu berturut-turut member masuk Top 5 (sampai minggu acuan).
 
 from calendar import monthrange
@@ -15,10 +18,12 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from . import models
+from .config import settings
 from .poin import nilai_poin
 
 TOP_STREAK = 5          # masuk Top berapa supaya streak bertambah
 BATAS_STREAK = 104      # maksimal menghitung mundur 2 tahun
+AWAL_KARIER = date(2011, 1, 1)
 
 
 # ---------------------------------------------------------------------
@@ -26,7 +31,10 @@ BATAS_STREAK = 104      # maksimal menghitung mundur 2 tahun
 # ---------------------------------------------------------------------
 
 def rentang_periode(jenis: str, tanggal: date) -> tuple[date, date]:
-    """Minggu = Senin s/d Minggu. Bulan = tanggal 1 s/d akhir bulan."""
+    """Minggu = Senin s/d Minggu. Bulan = tanggal 1 s/d akhir bulan.
+    Karier = sejak JKT48 berdiri sampai tanggal acuan."""
+    if jenis == "karier":
+        return AWAL_KARIER, tanggal
     if jenis == "minggu":
         mulai = tanggal - timedelta(days=tanggal.weekday())
         return mulai, mulai + timedelta(days=6)
@@ -54,6 +62,20 @@ def _poin_aktivitas(db: Session, mulai: date, selesai: date) -> dict[int, dict[s
     hasil: dict[int, dict[str, float]] = {}
     for member_id, kode, total in baris:
         hasil.setdefault(member_id, {})[kode] = float(total)
+    return hasil
+
+
+def _poin_saldo_awal(db: Session) -> dict[int, dict[str, float]]:
+    """{member_id: {kode: poin}} dari saldo awal karier (tabel member_baseline).
+    Show awal x poin show, lagu awal x poin lagu baru, center awal x poin center."""
+    peta = {"show": "total_show_awal", "lagu_baru": "total_lagu_awal", "center": "total_center_awal"}
+    nilai = {kode: nilai_poin(db, kode) for kode in peta}
+    hasil: dict[int, dict[str, float]] = {}
+    for b in db.scalars(select(models.MemberBaseline)):
+        for kode, kolom in peta.items():
+            jumlah = getattr(b, kolom) or 0
+            if jumlah:
+                hasil.setdefault(b.member_id, {})[kode] = float(jumlah * nilai[kode])
     return hasil
 
 
@@ -117,7 +139,14 @@ def hitung(db: Session, jenis: str, tanggal: date) -> tuple[date, date, list[dic
                          .where(models.Member.status.in_(["aktif", "trainee"]))).all()
 
     poin = _poin_aktivitas(db, mulai, selesai)
-    pertumbuhan = _pertumbuhan_follower(db, mulai, selesai)
+    if jenis == "karier":
+        # tambahkan saldo awal ke poin aktivitas yang tercatat di web
+        for mid, rincian_awal in _poin_saldo_awal(db).items():
+            gabung = poin.setdefault(mid, {})
+            for kode, nilai in rincian_awal.items():
+                gabung[kode] = gabung.get(kode, 0.0) + nilai
+    # Fitur follower sedang dimatikan (lihat config.py) -> tidak ada poin follower
+    pertumbuhan = _pertumbuhan_follower(db, mulai, selesai) if settings.fitur_follower else {}
     tertinggi = max(pertumbuhan.values(), default=0.0)
     poin_kapten_aktif = nilai_poin(db, "kapten_aktif")
     poin_follower_maks = nilai_poin(db, "follower")

@@ -52,7 +52,7 @@ def baca_csv(path: str) -> list[dict]:
         dialek = csv.excel
     baris = list(csv.DictReader(teks.splitlines(), dialect=dialek))
     # rapikan: nama kolom huruf kecil, buang spasi; sel kosong -> None
-    return [{(k or "").strip().lower(): (v.strip() if v and v.strip() else None)
+    return [{(k or "").strip().lower(): (" ".join(v.replace("\xa0", " ").split()) or None if v else None)
              for k, v in b.items()} for b in baris]
 
 
@@ -77,7 +77,8 @@ def baca_excel(path: str, nama_sheet: str) -> list[dict]:
             return nilai.isoformat()
         if isinstance(nilai, float) and nilai.is_integer():
             return str(int(nilai))                     # 158.0 -> "158"
-        teks = str(nilai).strip()
+        # \xa0 = spasi "tak terlihat" yang sering ikut saat copy-paste dari web
+        teks = " ".join(str(nilai).replace("\xa0", " ").split())
         return teks or None
 
     judul = [str(j).strip().lower() if j is not None else "" for j in semua[0]]
@@ -90,7 +91,10 @@ def tanggal(teks: str | None, kolom: str, wajib: bool = False) -> date | None:
         if wajib:
             raise BarisSalah(f"kolom '{kolom}' wajib diisi")
         return None
-    for format_ in ("%Y-%m-%d", "%d/%m/%Y", "%d-%m-%Y", "%d/%m/%y"):
+    teks = " ".join(teks.replace("\xa0", " ").split())          # buang spasi aneh dari copy-paste web
+    # Format yang dikenali: 2026-05-03, 03/05/2026, 2011.11.02, "June 3, 1997", "3 June 1997"
+    for format_ in ("%Y-%m-%d", "%d/%m/%Y", "%d-%m-%Y", "%d/%m/%y", "%Y.%m.%d",
+                    "%B %d, %Y", "%b %d, %Y", "%d %B %Y", "%d %b %Y"):
         try:
             return datetime.strptime(teks, format_).date()
         except ValueError:
@@ -101,7 +105,8 @@ def tanggal(teks: str | None, kolom: str, wajib: bool = False) -> date | None:
 def angka(teks: str | None, kolom: str) -> int | None:
     if not teks:
         return None
-    bersih = teks.replace(".", "").replace(",", "").replace(" ", "")
+    bersih = (teks.lower().replace("\xa0", "").replace("cm", "")      # "160 cm" -> 160
+              .replace(".", "").replace(",", "").replace(" ", ""))
     if not bersih.isdigit():
         raise BarisSalah(f"'{teks}' di kolom '{kolom}' bukan angka")
     return int(bersih)

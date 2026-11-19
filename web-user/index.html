@@ -21,9 +21,9 @@
         JKT48 Fan Board
       </a>
       <nav aria-label="Navigasi utama" class="menu">
-        <a href="#leaderboard">Leaderboard</a>
-        <a href="#profil">Profil Grup</a>
-        <a href="#member">Member</a>
+        <a href="index.html" aria-current="page">Leaderboard</a>
+        <a href="infografis.html">Infografis</a>
+        <a href="member.html">Member</a>
       </nav>
     </div>
   </header>
@@ -42,15 +42,16 @@
       <div class="judul-baris">
         <div>
           <p class="kicker">ランキング · LEADERBOARD</p>
-          <h1 class="judul-besar">Siapa yang paling bersinar <span id="kata-periode">minggu</span> ini?</h1>
+          <h1 class="judul-besar">Siapa yang paling bersinar <span id="kata-periode">minggu ini</span>?</h1>
           <p class="teks-redup">
-            Skor dihitung dari projek baru, posisi center, show, projek luar, lencana, hasil SSK,
-            dan pertumbuhan follower. Periode: <strong id="label-periode">…</strong>
+            Skor dihitung dari projek baru, posisi center, show, projek luar, lencana, dan hasil SSK.
+            Periode: <strong id="label-periode">…</strong>
           </p>
         </div>
         <div class="pil-grup" role="group" aria-label="Pilih periode">
           <button type="button" class="pil aktif" data-periode="minggu">Mingguan</button>
           <button type="button" class="pil" data-periode="bulan">Bulanan</button>
+          <button type="button" class="pil" data-periode="karier">Karier</button>
         </div>
       </div>
 
@@ -96,28 +97,6 @@
       </div>
     </section>
 
-    <!-- ============ SECTION 3: BIODATA MEMBER ============ -->
-    <section id="member" class="wadah section">
-      <p class="kicker">メンバー · BIODATA MEMBER</p>
-      <div class="judul-baris">
-        <h2 class="judul-section">Kenalan dengan member</h2>
-        <div class="pil-grup tanpa-bingkai" role="group" aria-label="Filter status">
-          <button type="button" class="pil aktif" data-status="">Semua</button>
-          <button type="button" class="pil" data-status="aktif">Aktif</button>
-          <button type="button" class="pil" data-status="trainee">Trainee</button>
-          <button type="button" class="pil" data-status="eks">Eks</button>
-        </div>
-      </div>
-      <div class="baris-cari">
-        <div class="kotak-cari">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-          <label for="cari-member" class="sr-only">Cari member</label>
-          <input type="search" id="cari-member" placeholder="Cari nama member, kota, atau team…" autocomplete="off">
-        </div>
-        <p class="teks-redup kecil" id="info-cari" aria-live="polite" style="margin:0"></p>
-      </div>
-      <div class="grid-member" id="daftar-member"></div>
-    </section>
   </main>
 
   <footer class="footer">

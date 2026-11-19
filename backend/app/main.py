@@ -10,15 +10,17 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from .config import settings
 from .penjadwal import hentikan_penjadwal, mulai_penjadwal
-from .routers import (aktivitas, aturan_poin, auth, grup, leaderboard, lencana, members,
-                      projek, show, sosmed, ssk)
+from .routers import (aktivitas, aturan_poin, auth, grup, infografis, leaderboard, lencana,
+                      members, projek, show, sosmed, ssk)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Dijalankan SEKALI saat API menyala ...
-    mulai_penjadwal()
+    if settings.fitur_follower:
+        mulai_penjadwal()      # tarik follower IG otomatis tiap Minggu
     yield
     # ... dan sekali saat API dimatikan
     hentikan_penjadwal()
@@ -50,8 +52,10 @@ app.include_router(lencana.router)
 app.include_router(aktivitas.router)
 app.include_router(aturan_poin.router)
 app.include_router(leaderboard.router)
-app.include_router(sosmed.router)
+if settings.fitur_follower:
+    app.include_router(sosmed.router)
 app.include_router(grup.router)
+app.include_router(infografis.router)
 
 
 @app.get("/", tags=["Umum"])

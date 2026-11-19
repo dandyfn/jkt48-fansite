@@ -10,6 +10,7 @@ from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from .. import models
+from ..config import settings
 from ..database import get_db
 from ..keamanan import admin_saja
 from ..schemas import JenisPoinOut, JenisPoinUpdate
@@ -22,7 +23,10 @@ KODE_RUMUS = {"ssk", "follower"}
 
 @router.get("", response_model=list[JenisPoinOut])
 def daftar_aturan(db: Session = Depends(get_db)):
-    return db.scalars(select(models.JenisPoin)).all()
+    aturan = db.scalars(select(models.JenisPoin)).all()
+    if not settings.fitur_follower:
+        aturan = [a for a in aturan if a.kode != "follower"]   # fitur follower sedang mati
+    return aturan
 
 
 @router.put("/{kode}", response_model=JenisPoinOut, dependencies=[Depends(admin_saja)])

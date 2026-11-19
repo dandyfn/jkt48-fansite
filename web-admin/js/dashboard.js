@@ -1,5 +1,5 @@
 // dashboard.js
-// Ringkasan untuk admin: jumlah member, akun yang follower-nya perlu diupdate,
+// Ringkasan untuk admin: jumlah member, jumlah lagu,
 // Top 5 minggu ini, dan poin yang terakhir tercatat.
 
 const LABEL_JENIS = {
@@ -8,29 +8,25 @@ const LABEL_JENIS = {
 };
 
 async function muatDashboard() {
-  const [grup, akun, lb, aktivitas] = await Promise.all([
+  const [grup, lb, aktivitas] = await Promise.all([
     panggil("/api/grup").catch(() => null),
-    panggil("/api/sosmed/akun").catch(() => []),
     panggil("/api/leaderboard?periode=minggu").catch(() => null),
     panggil("/api/aktivitas?batas=10").catch(() => []),
   ]);
 
   // Kotak ringkasan
-  const perluUpdate = akun.filter((a) => a.perlu_update).length;
   const s = grup ? grup.statistik : {};
   const kotak = [
     [s.member_aktif, "Member aktif", "member.html"],
     [s.member_trainee, "Trainee", "member.html"],
     [s.member_eks, "Member eks", "member.html"],
-    [perluUpdate, "Akun follower perlu diupdate", null, perluUpdate > 0],
+    [s.jumlah_lagu, "Lagu tercatat", "aktivitas.html#projek"],
   ];
   document.getElementById("ringkasan").innerHTML = kotak.map(([n, label, href, waspada]) => {
     const isi = `<span class="angka">${angka(n)}</span><span class="label">${label}</span>`;
     const kelas = `kotak-ringkas${waspada ? " waspada" : ""}`;
     return href ? `<a href="${href}" class="${kelas}">${isi}</a>` : `<div class="${kelas}">${isi}</div>`;
   }).join("");
-  document.getElementById("info-follower").textContent =
-    `${akun.length} akun sosmed terdaftar, ${perluUpdate} belum diupdate lebih dari 7 hari.`;
 
   // Top 5
   const top = document.getElementById("top5");

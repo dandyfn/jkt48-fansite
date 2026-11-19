@@ -426,6 +426,24 @@ class GrupUpdate(BaseModel):
     logo_url: str | None = None
 
 
+class InfografisMember(BaseModel):
+    """Satu member di halaman infografis. None = datanya belum ada."""
+    id: int
+    nama_panggilan: str
+    generasi: int
+    team: str | None
+    status: str
+    foto_url: str | None
+    tanggal_lahir: date | None
+    umur: int | None
+    tinggi_cm: int | None
+    total_show: int
+    total_lagu: int
+    total_center: int
+    total_projek: int
+    total_senbatsu: int | None
+
+
 class StatistikMember(BaseModel):
     total_show: int
     total_lagu: int

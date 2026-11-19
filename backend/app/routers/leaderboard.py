@@ -22,21 +22,25 @@ from ..schemas import LeaderboardOut, RiwayatSkorOut
 router = APIRouter(prefix="/api/leaderboard", tags=["Leaderboard"])
 
 Periode = Literal["minggu", "bulan"]
+PeriodeTampil = Literal["minggu", "bulan", "karier"]   # "karier" hanya untuk dilihat, tidak disimpan
 
 
 @router.get("", response_model=LeaderboardOut)
 def lihat_leaderboard(
-    periode: Periode = "minggu",
+    periode: PeriodeTampil = "minggu",
     tanggal: date | None = Query(default=None, description="Tanggal mana saja di dalam periode. Kosong = hari ini"),
     db: Session = Depends(get_db),
 ):
     tanggal = tanggal or date.today()
     mulai, selesai, baris = hitung(db, periode, tanggal)
 
-    # Peringkat periode sebelumnya -> untuk tanda naik/turun
-    _, _, baris_lalu = hitung(db, periode, periode_sebelumnya(periode, mulai)[0])
-    ada_data_lalu = any(r["skor"] > 0 for r in baris_lalu)
-    peringkat_lalu = {r["member"].id: r["peringkat"] for r in baris_lalu}
+    # Peringkat periode sebelumnya -> untuk tanda naik/turun (tidak berlaku untuk karier)
+    if periode == "karier":
+        ada_data_lalu, peringkat_lalu = False, {}
+    else:
+        _, _, baris_lalu = hitung(db, periode, periode_sebelumnya(periode, mulai)[0])
+        ada_data_lalu = any(r["skor"] > 0 for r in baris_lalu)
+        peringkat_lalu = {r["member"].id: r["peringkat"] for r in baris_lalu}
 
     streak = hitung_streak(db, selesai)
 

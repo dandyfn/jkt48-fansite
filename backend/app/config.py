@@ -17,6 +17,11 @@ class Settings(BaseSettings):
     ig_user_id: str = ""
     ig_access_token: str = ""
 
+    # Saklar fitur follower (Instagram & TikTok).
+    # False = tidak dihitung di leaderboard, rate card disembunyikan, penjadwal IG mati.
+    # Ubah ke True (atau tulis FITUR_FOLLOWER=true di .env) kalau mau dipakai lagi.
+    fitur_follower: bool = False
+
     # Baca dari file .env; abaikan isi .env yang tidak dikenal
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

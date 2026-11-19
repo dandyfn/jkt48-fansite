@@ -7,7 +7,6 @@
 //   GET /api/leaderboard                  -> peringkat, skor, rincian, streak minggu ini
 //   GET /api/aktivitas?member_id=...      -> catatan poin minggu ini (untuk keterangan)
 //   GET /api/leaderboard/riwayat/{id}     -> grafik skor
-//   GET /api/sosmed/ratecard/{id}         -> rate card
 //   GET /api/lencana?member_id=...        -> lencana kapten, dll
 //   GET /api/projek?member_id=...         -> projek terbaru
 
@@ -67,29 +66,31 @@ async function muatDetail() {
   }
   document.title = `${member.nama_panggilan} · JKT48 Fan Board`;
 
-  const lb = await ambilAman("/api/leaderboard?periode=minggu", null);
+  const [lb, lbKarier] = await Promise.all([
+    ambilAman("/api/leaderboard?periode=minggu", null),
+    ambilAman("/api/leaderboard?periode=karier", null),
+  ]);
   const minggu = lb ? `&dari=${lb.mulai}&sampai=${lb.selesai}` : "";
 
   // Panggil sisanya bersamaan
-  const [statistik, aktivitas, riwayat, ratecard, lencana, projek] = await Promise.all([
+  const [statistik, aktivitas, riwayat, lencana, projek] = await Promise.all([
     ambilAman(`/api/members/${id}/statistik`, null),
     ambilAman(`/api/aktivitas?member_id=${id}${minggu}`, []),
     ambilAman(`/api/leaderboard/riwayat/${id}?batas=8`, []),
-    ambilAman(`/api/sosmed/ratecard/${id}`, []),
     ambilAman(`/api/lencana?member_id=${id}`, []),
     ambilAman(`/api/projek?member_id=${id}&batas=6`, []),
   ]);
   const baris = lb ? lb.data.find((d) => d.member_id === id) : null;
+  const barisKarier = lbKarier ? lbKarier.data.find((d) => d.member_id === id) : null;
 
-  isiHero(member, baris, statistik, lencana);
+  isiHero(member, baris, statistik, lencana, barisKarier);
   isiRincianPoin(baris, aktivitas, lb);
-  isiRatecard(ratecard);
   isiGrafik(riwayat, baris, lb);
   isiProjek(projek);
 }
 
 // ----------------------------------------------------------------------
-function isiHero(m, baris, statistik, lencana) {
+function isiHero(m, baris, statistik, lencana, barisKarier) {
   document.getElementById("detail-foto").innerHTML = htmlFoto(m, m.id);
   document.getElementById("detail-nama").textContent = m.nama_panggilan;
   document.getElementById("detail-nama-lengkap").textContent =
@@ -103,8 +104,15 @@ function isiHero(m, baris, statistik, lencana) {
 
   // Sorotan: peringkat & streak
   const sorotan = [];
+  const mahkotaKecil = IKON_MAHKOTA.replace('width="22" height="22"', 'width="16" height="16"');
   if (baris) {
-    sorotan.push(`<span class="chip chip-gelap">${IKON_MAHKOTA.replace('width="22" height="22"', 'width="16" height="16"')} Peringkat ${baris.peringkat} minggu ini</span>`);
+    // Peringkat mingguan hanya ditampilkan kalau minggu ini sudah ada poinnya
+    if (baris.skor > 0) {
+      sorotan.push(`<span class="chip chip-gelap">${mahkotaKecil} Peringkat ${baris.peringkat} minggu ini</span>`);
+    }
+    if (barisKarier && barisKarier.skor > 0) {
+      sorotan.push(`<span class="chip chip-gelap">${mahkotaKecil} Peringkat ${barisKarier.peringkat} sepanjang karier</span>`);
+    }
     if (baris.streak_minggu > 0) {
       sorotan.push(`<span class="chip team-love">${IKON_STREAK} Streak ${baris.streak_minggu} minggu di Top 5</span>`);
     }
@@ -139,6 +147,7 @@ function isiHero(m, baris, statistik, lencana) {
   const s = statistik || {};
   const ubin = [
     [baris ? angka(baris.skor) : "–", "Poin minggu ini", true],
+    [barisKarier ? angka(barisKarier.skor) : "–", "Poin karier", true],
     [angka(s.total_lagu), "Lagu / projek", false],
     [angka(s.total_show), "Total show", false],
     [s.total_center !== undefined ? angka(s.total_center) + "×" : "–", "Posisi center", false],
