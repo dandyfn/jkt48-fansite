@@ -6,7 +6,7 @@
 //   - hapus (DELETE /api/members/{id})
 
 const KOLOM_MEMBER = [
-  "nama_lengkap", "nama_panggilan", "stage_name", "foto_url", "tempat_lahir", "tanggal_lahir",
+  "nama_lengkap", "nama_panggilan", "stage_name", "nama_jepang", "jiko", "foto_url", "tempat_lahir", "tanggal_lahir",
   "hometown", "tinggi_cm", "golongan_darah", "generasi", "team", "status",
   "tanggal_bergabung", "tanggal_lulus",
 ];

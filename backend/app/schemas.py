@@ -9,7 +9,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator
 
-from .utils import hitung_lama, hitung_umur, hitung_zodiak
+from .utils import hitung_lama, hitung_umur, hitung_zodiak, rapikan_team
 
 Status = Literal["trainee", "aktif", "eks"]
 GolDarah = Literal["A", "B", "AB", "O"]
@@ -19,6 +19,8 @@ class MemberBase(BaseModel):
     nama_lengkap: str = Field(min_length=1, max_length=120)
     nama_panggilan: str = Field(min_length=1, max_length=50)
     stage_name: str | None = None
+    nama_jepang: str | None = Field(default=None, max_length=80)
+    jiko: str | None = Field(default=None, max_length=500)
     tempat_lahir: str | None = None
     tanggal_lahir: date | None = None
     hometown: str | None = None
@@ -31,6 +33,11 @@ class MemberBase(BaseModel):
     tanggal_lulus: date | None = None
     foto_url: str | None = None
 
+    @field_validator("team")
+    @classmethod
+    def _rapikan_team(cls, v):
+        return rapikan_team(v)
+
 
 class MemberCreate(MemberBase):
     pass
@@ -41,6 +48,8 @@ class MemberUpdate(BaseModel):
     nama_lengkap: str | None = None
     nama_panggilan: str | None = None
     stage_name: str | None = None
+    nama_jepang: str | None = Field(default=None, max_length=80)
+    jiko: str | None = Field(default=None, max_length=500)
     tempat_lahir: str | None = None
     tanggal_lahir: date | None = None
     hometown: str | None = None
@@ -52,6 +61,11 @@ class MemberUpdate(BaseModel):
     tanggal_bergabung: date | None = None
     tanggal_lulus: date | None = None
     foto_url: str | None = None
+
+    @field_validator("team")
+    @classmethod
+    def _rapikan_team(cls, v):
+        return rapikan_team(v)
 
 
 class MemberOut(MemberBase):

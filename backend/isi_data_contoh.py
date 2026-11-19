@@ -63,9 +63,21 @@ def isi():
                        "idol yang bisa ditemui langsung lewat pertunjukan rutin di teater. "
                        "[Deskripsi contoh, ubah dari web admin]")))
 
+        # Nama Jepang (katakana) & jiko contoh. Jiko asli member nanti diisi dari Excel/admin.
+        KATAKANA = {"Hana": "ハナ", "Yuki": "ユキ", "Rin": "リン", "Mei": "メイ", "Sora": "ソラ", "Kiko": "キコ",
+                    "Nana": "ナナ", "Aya": "アヤ", "Miu": "ミウ", "Lulu": "ルル", "Ciko": "チコ", "Lala": "ララ",
+                    "Bunga": "ブンガ", "Dara": "ダラ", "Embun": "エンブン", "Kirei": "キレイ", "Mawar": "マワル",
+                    "Nami": "ナミ", "Pelangi": "プランギ", "Sakura": "サクラ", "Tara": "タラ", "Wulan": "ウラン"}
+
+        def jiko_contoh(nama: str) -> str | None:
+            if nama in ("Aya", "Ciko", "Wulan"):
+                return None   # sengaja dikosongkan: kartu tetap rapi tanpa jiko
+            return f"Halo semuanya! Aku {nama}, yang akan selalu bersinar untuk kalian. Salam kenal! [jiko contoh]"
+
         members = []
         for (pg, nl, lahir, kota, tinggi, darah, gen, team, status, gabung) in MEMBER:
             m = models.Member(nama_panggilan=pg, nama_lengkap=nl, stage_name=pg, tanggal_lahir=lahir,
+                              nama_jepang=KATAKANA.get(pg), jiko=jiko_contoh(pg),
                               tempat_lahir=kota, hometown=kota, tinggi_cm=tinggi, golongan_darah=darah,
                               generasi=gen, team=team, status=status, tanggal_bergabung=gabung,
                               tanggal_lulus=date(2024, 12, 20) if status == "eks" else None)

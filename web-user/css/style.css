@@ -66,6 +66,9 @@ main, .footer { position: relative; z-index: 1; }
 .team-love { background: #FCE4EE; color: #A3245A; }
 .team-dream { background: #ECE6FA; color: #5B3FA8; }
 .team-passion { background: #FFE7D6; color: #A4461A; }
+.team-j { background: #FDE2E2; color: #B0151F; }
+.team-kiii { background: #DDF3E6; color: #1E6B43; }
+.team-t { background: #FFF1C9; color: #7A5600; }
 .team-trainee { background: #EEF0F3; color: #3F4752; }
 .status-aktif { background: #E3F4EA; color: #1F6B43; }
 .status-trainee { background: #ECE6FA; color: #5B3FA8; }
@@ -147,9 +150,16 @@ main, .footer { position: relative; z-index: 1; }
 /* ---------- Biodata member ---------- */
 .grid-member { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
 .kartu-member { background: var(--putih); border: 1px solid var(--garis); border-radius: 28px; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
-.kartu-member .atas { display: flex; gap: 16px; align-items: center; }
-.kartu-member .foto { width: 96px; height: 120px; flex-shrink: 0; border-radius: 18px; }
-.kartu-member .foto .inisial { font-size: 40px; }
+.kartu-member .atas { display: flex; gap: 18px; align-items: center; }
+/* Foto kira-kira 40% lebar kartu, rasio potret 4:5. Ubah angka 40% kalau ingin lebih besar/kecil */
+.kartu-member .atas > .foto, .kartu-member .atas > .bingkai-kapten { width: 40%; flex-shrink: 0; }
+.kartu-member .foto { width: 100%; height: auto; aspect-ratio: 4 / 5; border-radius: 20px; }
+.kartu-member .bingkai-kapten { margin-bottom: 14px; }
+.kartu-member .foto .inisial { font-size: 64px; }
+.kartu-member .nama-jepang { font-size: 15px; font-weight: 700; color: var(--merah); letter-spacing: .04em; font-family: "Zen Maru Gothic", "Noto Sans JP", sans-serif; }
+.kartu-member .jiko, .detail-jiko { margin: 0; position: relative; padding: 14px 16px 14px 18px; border-radius: 16px; background: #FFF4F6; border-left: 4px solid var(--merah); font-size: 14px; line-height: 1.6; font-style: italic; color: var(--teks-2); }
+.kartu-member .jiko::before, .detail-jiko::before { content: "\201C"; position: absolute; right: 12px; top: -6px; font-family: var(--font-judul); font-size: 56px; line-height: 1; color: rgba(200,16,46,.15); font-style: normal; }
+.label-jiko { display: block; margin-bottom: 4px; font-size: 11px; font-weight: 800; font-style: normal; letter-spacing: .08em; text-transform: uppercase; color: var(--merah); }
 .kartu-member .nama { font-family: var(--font-judul); font-weight: 900; font-size: 24px; line-height: 1.1; }
 .kartu-member .nama-lengkap { font-size: 14px; color: var(--teks-2); font-weight: 600; }
 .kartu-member dl { margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 16px; padding-top: 14px; border-top: 1px dashed var(--garis); font-size: 14px; }
@@ -293,3 +303,7 @@ main, .footer { position: relative; z-index: 1; }
   .grid-statistik { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .hiasan.besar { display: none; }
 }
+
+/* Nama Jepang & jiko di halaman detail */
+.detail-nama-jepang { margin: 4px 0 0; font-size: 18px; font-weight: 700; color: var(--merah); letter-spacing: .05em; }
+.detail-jiko { font-size: 16px; max-width: 640px; }

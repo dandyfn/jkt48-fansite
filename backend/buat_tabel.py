@@ -7,7 +7,7 @@
 
 from pathlib import Path
 
-from sqlalchemy import inspect
+from sqlalchemy import inspect, text
 
 from app import models
 from app.database import Base, SessionLocal, engine
@@ -27,11 +27,32 @@ ATURAN_POIN = [
 ]
 
 
+def tambah_kolom_baru() -> list[str]:
+    """create_all hanya membuat TABEL baru; kolom baru di tabel lama tidak ikut dibuat.
+    Fungsi ini menambahkan kolom yang ada di models.py tapi belum ada di database,
+    tanpa menghapus data yang sudah ada."""
+    ditambah = []
+    with engine.begin() as conn:
+        periksa = inspect(conn)
+        for tabel in Base.metadata.sorted_tables:
+            if not periksa.has_table(tabel.name):
+                continue
+            sudah_ada = {k["name"] for k in periksa.get_columns(tabel.name)}
+            for kolom in tabel.columns:
+                if kolom.name in sudah_ada:
+                    continue
+                tipe = kolom.type.compile(dialect=engine.dialect)
+                conn.execute(text(f'ALTER TABLE "{tabel.name}" ADD COLUMN "{kolom.name}" {tipe}'))
+                ditambah.append(f"{tabel.name}.{kolom.name}")
+    return ditambah
+
+
 def main():
     Path("data").mkdir(exist_ok=True)
 
-    # 1) Buat semua tabel yang ada di models.py
+    # 1) Buat semua tabel yang ada di models.py, lalu lengkapi kolom yang belum ada
     Base.metadata.create_all(engine)
+    kolom_baru = tambah_kolom_baru()
 
     # 2) Isi aturan poin (hanya yang belum ada)
     with SessionLocal() as db:
@@ -49,6 +70,7 @@ def main():
     for nama in daftar:
         print("  -", nama)
     print(f"Aturan poin baru ditambahkan: {baru}")
+    print("Kolom baru ditambahkan:", ", ".join(kolom_baru) if kolom_baru else "tidak ada")
 
 
 if __name__ == "__main__":

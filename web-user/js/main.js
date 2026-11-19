@@ -271,10 +271,12 @@ function kartuMember(m, indeks) {
           <span class="chip status-${esc(m.status)}" style="align-self:flex-start">${esc(m.status[0].toUpperCase() + m.status.slice(1))}</span>
           <span class="nama">${esc(m.nama_panggilan)}</span>
           <span class="nama-lengkap">${esc(m.nama_lengkap)}</span>
+          ${m.nama_jepang ? `<span class="nama-jepang" lang="ja">${esc(m.nama_jepang)}</span>` : ""}
           ${m.kapten ? `<span class="chip ikon-emas" style="align-self:flex-start">Kapten ${esc(m.kapten)}</span>` : ""}
           <span style="font-size:13px;color:var(--redup)">${m.lama_di_jkt48 ? "Di JKT48 " + esc(m.lama_di_jkt48) : ""}</span>
         </div>
       </div>
+      ${m.jiko ? `<blockquote class="jiko"><span class="label-jiko">Jiko</span>${esc(m.jiko)}</blockquote>` : ""}
       <dl>
         ${baris.map(([dt, dd]) => `<div><dt>${dt}</dt><dd>${esc(dd)}</dd></div>`).join("")}
       </dl>

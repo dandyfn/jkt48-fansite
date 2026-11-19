@@ -21,3 +21,6 @@ joblib
 
 # --- Notebook untuk latihan ML di VS Code ---
 ipykernel
+
+# --- Membaca file Excel untuk import data ---
+openpyxl

@@ -26,6 +26,8 @@ class Member(Base):
     nama_lengkap: Mapped[str] = mapped_column(String(120))
     nama_panggilan: Mapped[str] = mapped_column(String(50))
     stage_name: Mapped[str | None] = mapped_column(String(50))
+    nama_jepang: Mapped[str | None] = mapped_column(String(80))      # contoh: オラ
+    jiko: Mapped[str | None] = mapped_column(Text)                   # jikoshoukai (salam perkenalan)
     tempat_lahir: Mapped[str | None] = mapped_column(String(80))
     tanggal_lahir: Mapped[date | None] = mapped_column(Date)
     hometown: Mapped[str | None] = mapped_column(String(80))

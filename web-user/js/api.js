@@ -64,7 +64,7 @@ const IKON_MAHKOTA_KECIL =
 function htmlFoto(member, indeks, ukuran = "besar") {
   const tint = "tint-" + (indeks % 4);
   const isi = member.foto_url
-    ? `<img src="${esc(member.foto_url)}" alt="Foto ${esc(member.nama_panggilan)}" loading="lazy">`
+    ? `<img src="${esc(member.foto_url)}" alt="Foto ${esc(member.nama_panggilan)}" loading="lazy" referrerpolicy="no-referrer">`
     : `<span class="inisial" aria-hidden="true">${esc((member.nama_panggilan || "?")[0])}</span>`;
   const foto = `<div class="foto ${tint}">${isi}</div>`;
   if (!member.kapten) return foto;

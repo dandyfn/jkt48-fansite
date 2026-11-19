@@ -94,6 +94,12 @@ function isiHero(m, baris, statistik, lencana) {
   document.getElementById("detail-nama").textContent = m.nama_panggilan;
   document.getElementById("detail-nama-lengkap").textContent =
     m.nama_lengkap + (m.stage_name && m.stage_name !== m.nama_panggilan ? ` · Stage name: ${m.stage_name}` : "");
+  const jepang = document.getElementById("detail-nama-jepang");
+  jepang.textContent = m.nama_jepang || "";
+  jepang.hidden = !m.nama_jepang;
+  const jiko = document.getElementById("detail-jiko");
+  jiko.innerHTML = m.jiko ? `<span class="label-jiko">Jiko</span>${esc(m.jiko)}` : "";
+  jiko.hidden = !m.jiko;
 
   // Sorotan: peringkat & streak
   const sorotan = [];

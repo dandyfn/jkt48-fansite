@@ -51,3 +51,22 @@ def hitung_lama(mulai: date | None, selesai: date | None = None) -> str | None:
 def poin_ssk(peringkat: int) -> float:
     """Rumus SSK: (33 - peringkat) + bonus 10 untuk peringkat 1-16 (single utama)."""
     return (33 - peringkat) + (10 if peringkat <= 16 else 0)
+
+
+# Nama team resmi, ditulis dengan huruf besar/kecil yang benar.
+# Kunci = versi huruf kecil tanpa kata "team", supaya "team kiii", "K3", "KIII" jadi sama.
+TEAM_RESMI = {"love": "Love", "dream": "Dream", "passion": "Passion",
+              "j": "J", "t": "T", "kiii": "KIII", "k3": "KIII"}
+
+
+def rapikan_team(team: str | None) -> str | None:
+    """'team kiii' -> 'KIII', 'love' -> 'Love'. Kosong -> None (trainee).
+    Nama team lain yang belum dikenal dibiarkan apa adanya."""
+    if team is None:
+        return None
+    t = team.strip()
+    if t.lower().startswith("team "):
+        t = t[5:].strip()
+    if not t or t.lower() == "team":
+        return None
+    return TEAM_RESMI.get(t.lower(), t)
