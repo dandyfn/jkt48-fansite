@@ -41,7 +41,7 @@ const KATEGORI = [
     catatan: "Dari sheet show + saldo awal total show." },
   { kolom: "total_senbatsu", judul: "Paling banyak senbatsu", sub: "masuk lineup single utama", satuan: "kali",
     ikon: "senbatsu", warnaIkon: ["#F6E7B8", "#5C4300"],
-    catatan: "Butuh data baru: tanda senbatsu pada lineup setiap single." },
+    catatan: "Dari lineup lagu utama (A-side) setiap single." },
   { kolom: "total_lagu", judul: "Paling banyak bawa lagu", sub: "lagu yang pernah dibawakan", satuan: "lagu",
     ikon: "lagu", warnaIkon: ["#ECE6FA", "#5B3FA8"],
     catatan: "Dari total lagu awal + lagu baru yang tercatat di web." },
@@ -279,8 +279,8 @@ function gambarLingkaran() {
       gen: "Generasi yang belum pernah dapat posisi center tidak muncul di lingkaran, hanya di legenda.",
       member: "Member yang belum pernah jadi center tidak muncul di lingkaran, hanya di legenda." } }),
     grafikLingkaran({ judul: "Jumlah senbatsu", kolom: "total_senbatsu", catatan: {
-      gen: "Angka asli tampil setelah lineup senbatsu diinput.",
-      member: "Angka asli tampil setelah lineup senbatsu diinput." } }),
+      gen: "Senbatsu = ikut lineup lagu utama single.",
+      member: "Persentase = senbatsu member itu dibagi total senbatsu satu generasi." } }),
   ].join("");
 }
 
@@ -353,9 +353,173 @@ document.getElementById("grid-juara").addEventListener("click", (e) => {
 });
 
 // ----------------------------------------------------------------------
+// 5) Cari member: semua member (aktif, trainee, eks)
+//    Data: GET /api/infografis?termasuk_eks=true
+//    Peringkat dihitung dibanding SEMUA member sepanjang sejarah.
+// ----------------------------------------------------------------------
+let SEMUA = [];                                  // semua member termasuk eks
+const cari = { status: "semua", pilih: -1, saran: [] };
+const LABEL_STATUS = { aktif: "Aktif", trainee: "Trainee", eks: "Eks" };
+
+// Ubin di kartu hasil: strukturnya sama dengan 6 kartu juara + center + SSK
+const UBIN = [
+  { kolom: "total_show", judul: "Show", satuan: "show", ikon: "show", warna: KATEGORI[0].warnaIkon },
+  { kolom: "total_senbatsu", judul: "Senbatsu", satuan: "kali", ikon: "senbatsu", warna: KATEGORI[1].warnaIkon },
+  { kolom: "total_lagu", judul: "Lagu", satuan: "lagu", ikon: "lagu", warna: KATEGORI[2].warnaIkon },
+  { kolom: "total_center", judul: "Center", satuan: "kali", ikon: "senbatsu", warna: ["#FDE3E3", "#8E0C22"] },
+  { kolom: "tinggi_cm", judul: "Tinggi", satuan: "cm", ikon: "tinggi", warna: KATEGORI[3].warnaIkon },
+  { kolom: "umur", judul: "Umur", satuan: "tahun", ikon: "umur", warna: KATEGORI[4].warnaIkon, umur: true },
+  { kolom: "total_projek", judul: "Projek luar", satuan: "projek", ikon: "projek", warna: KATEGORI[5].warnaIkon },
+  { kolom: "ssk_terbaik", judul: "SSK terbaik", satuan: "", ikon: "senbatsu", warna: ["#F6E7B8", "#5C4300"], ssk: true },
+];
+
+const normal = (t) => (t || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+// Peringkat satu member di satu ubin, dibanding semua member yang punya nilainya
+function peringkatDiSemua(ubin, m) {
+  let daftar;
+  if (ubin.umur) {
+    if (!m.tanggal_lahir) return null;
+    daftar = SEMUA.filter((x) => x.tanggal_lahir).sort((a, b) => a.tanggal_lahir.localeCompare(b.tanggal_lahir));
+    const urut = beriPeringkat(daftar, (x) => x.tanggal_lahir);
+    return { posisi: urut.find((x) => x.id === m.id).peringkat, dari: urut.length, kata: "tertua" };
+  }
+  if (ubin.ssk) {
+    if (!m.ssk_terbaik) return null;
+    daftar = SEMUA.filter((x) => x.ssk_terbaik).sort((a, b) => a.ssk_terbaik - b.ssk_terbaik);
+  } else {
+    if (!(m[ubin.kolom] > 0)) return null;
+    daftar = SEMUA.filter((x) => x[ubin.kolom] > 0).sort((a, b) => b[ubin.kolom] - a[ubin.kolom]);
+  }
+  const urut = beriPeringkat(daftar, (x) => x[ubin.kolom]);
+  return { posisi: urut.find((x) => x.id === m.id).peringkat, dari: urut.length, kata: "" };
+}
+
+function teksPeriode(m) {
+  const mulai = m.tanggal_bergabung ? tanggal(m.tanggal_bergabung, { month: "short", year: "numeric" }) : "?";
+  if (m.status === "eks") {
+    const akhir = m.tanggal_lulus ? tanggal(m.tanggal_lulus, { month: "short", year: "numeric" }) : "?";
+    return `${mulai} – ${akhir}`;
+  }
+  return `${mulai} – sekarang`;
+}
+
+function kartuHasil(m) {
+  const indeks = SEMUA.indexOf(m);
+  const ubin = UBIN.map((u) => {
+    const nilai = u.ssk ? (m.ssk_terbaik ? `#${m.ssk_terbaik}` : null) : m[u.kolom];
+    const ada = nilai !== null && nilai !== undefined;
+    const p = peringkatDiSemua(u, m);
+    const [bg, fg] = u.warna;
+    return `
+      <div class="ubin">
+        <span class="juara-ikon kecil" style="background:${bg}" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${fg}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${IKON[u.ikon]}"/></svg>
+        </span>
+        <span class="ubin-judul">${u.judul}</span>
+        <strong class="ubin-angka">${ada ? (u.ssk ? esc(nilai) : angka(nilai)) : "–"}${ada && u.satuan ? ` <small>${u.satuan}</small>` : ""}</strong>
+        <span class="ubin-peringkat">${p ? `Peringkat ${p.kata ? p.kata + " " : ""}<b>#${p.posisi}</b> dari ${p.dari}` : (u.ssk ? "Belum pernah ikut SSK" : "Belum ada data")}</span>
+      </div>`;
+  }).join("");
+
+  return `
+    <article class="kartu-cari">
+      <div class="cari-kepala">
+        <div class="juara-foto">${htmlFoto(m, indeks)}</div>
+        <div class="cari-identitas">
+          <span class="lencana-status status-${m.status}">${LABEL_STATUS[m.status] || esc(m.status)}</span>
+          <h3>${esc(m.nama_panggilan)}</h3>
+          <p>${esc(m.nama_lengkap || "")}</p>
+          <p class="redup-kecil">Gen ${m.generasi} · ${esc(m.team ? `Team ${m.team}` : m.status === "trainee" ? "Trainee" : "–")} · ${esc(teksPeriode(m))}</p>
+        </div>
+        <a class="tombol-lengkap cari-profil" href="detail.html?id=${m.id}">Lihat profil
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
+      </div>
+      <div class="grid-ubin">${ubin}</div>
+      <p class="kartu-catatan">Peringkat dibanding ${SEMUA.length} member (aktif, trainee, eks). Nilai sama = peringkat sama.
+        Total lagu & center member eks hanya dari lagu yang tercatat (single, album, digital, projek grup).</p>
+    </article>`;
+}
+
+function gambarSaran() {
+  const input = document.getElementById("cari-input");
+  const kata = normal(input.value.trim());
+  const daftar = SEMUA.filter((m) => cari.status === "semua" || m.status === cari.status);
+  cari.saran = kata
+    ? daftar.filter((m) => normal(m.nama_panggilan).includes(kata) || normal(m.nama_lengkap).includes(kata))
+        .sort((a, b) => (normal(b.nama_panggilan).startsWith(kata) - normal(a.nama_panggilan).startsWith(kata))
+          || a.generasi - b.generasi)
+        .slice(0, 8)
+    : [];
+  const ul = document.getElementById("cari-saran");
+  ul.innerHTML = cari.saran.map((m, i) => `
+    <li role="option" id="saran-${i}" data-id="${m.id}" aria-selected="${i === cari.pilih}" class="${i === cari.pilih ? "dipilih" : ""}">
+      <strong>${esc(m.nama_panggilan)}</strong>
+      <span>${esc(m.nama_lengkap || "")}</span>
+      <small>Gen ${m.generasi} · ${LABEL_STATUS[m.status] || esc(m.status)}</small>
+    </li>`).join("");
+  const buka = cari.saran.length > 0;
+  ul.hidden = !buka;
+  input.setAttribute("aria-expanded", String(buka));
+  if (cari.pilih >= 0) input.setAttribute("aria-activedescendant", `saran-${cari.pilih}`);
+  else input.removeAttribute("aria-activedescendant");
+  document.getElementById("cari-info").textContent = kata && !buka
+    ? "Tidak ada member yang cocok."
+    : `${daftar.length} member bisa dicari${cari.status === "semua" ? " (aktif, trainee, eks)" : ""}.`;
+}
+
+function tampilkanMember(id) {
+  const m = SEMUA.find((x) => x.id === Number(id));
+  if (!m) return;
+  document.getElementById("cari-input").value = m.nama_panggilan;
+  cari.saran = []; cari.pilih = -1;
+  document.getElementById("cari-saran").hidden = true;
+  document.getElementById("cari-input").setAttribute("aria-expanded", "false");
+  document.getElementById("cari-hasil").innerHTML = kartuHasil(m);
+}
+
+(function pasangCari() {
+  const input = document.getElementById("cari-input");
+  input.addEventListener("input", () => { cari.pilih = -1; gambarSaran(); });
+  input.addEventListener("keydown", (e) => {
+    if (!cari.saran.length) return;
+    if (e.key === "ArrowDown") { cari.pilih = (cari.pilih + 1) % cari.saran.length; gambarSaran(); e.preventDefault(); }
+    else if (e.key === "ArrowUp") { cari.pilih = (cari.pilih - 1 + cari.saran.length) % cari.saran.length; gambarSaran(); e.preventDefault(); }
+    else if (e.key === "Enter") { tampilkanMember(cari.saran[Math.max(cari.pilih, 0)].id); e.preventDefault(); }
+    else if (e.key === "Escape") { document.getElementById("cari-saran").hidden = true; }
+  });
+  document.getElementById("cari-saran").addEventListener("click", (e) => {
+    const li = e.target.closest("[data-id]");
+    if (li) tampilkanMember(li.dataset.id);
+  });
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".cari-kotak")) document.getElementById("cari-saran").hidden = true;
+  });
+  document.querySelectorAll("[data-status]").forEach((t) => t.addEventListener("click", () => {
+    cari.status = t.dataset.status;
+    document.querySelectorAll("[data-status]").forEach((x) => {
+      x.classList.toggle("aktif", x === t);
+      x.setAttribute("aria-pressed", String(x === t));
+    });
+    cari.pilih = -1;
+    gambarSaran();
+  }));
+})();
+
+async function muatSemuaMember() {
+  try {
+    SEMUA = await ambil("/api/infografis?termasuk_eks=true");
+    gambarSaran();
+  } catch (e) {
+    document.getElementById("cari-info").textContent = "Daftar member gagal dimuat.";
+  }
+}
+
+// ----------------------------------------------------------------------
 // Mulai
 // ----------------------------------------------------------------------
 (async function mulai() {
+  muatSemuaMember();               // kotak "Cari member" dimuat terpisah
   try {
     MEMBER = await ambil("/api/infografis");
   } catch (e) {

@@ -79,6 +79,34 @@
       <div class="grid-tiga" id="grafik-lingkaran"></div>
     </section>
 
+    <!-- ============ CARI MEMBER (aktif, trainee, eks) ============ -->
+    <section aria-labelledby="judul-cari" class="cari-blok">
+      <div class="info-judul">
+        <p class="kicker">検索 · CARI MEMBER</p>
+        <h2 class="info-h2" id="judul-cari">Cari member, dari generasi 1 sampai sekarang</h2>
+        <p class="info-keterangan">Termasuk member eks. Ketik nama panggilan atau nama lengkap, lalu lihat angka dan peringkatnya dibanding <strong>semua member sepanjang sejarah</strong>.</p>
+      </div>
+
+      <div class="cari-kotak">
+        <div class="cari-input-wadah">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+          <input type="search" id="cari-input" placeholder="Contoh: Melody, Shani, Freya…" autocomplete="off"
+                 role="combobox" aria-expanded="false" aria-controls="cari-saran" aria-autocomplete="list"
+                 aria-label="Cari member">
+        </div>
+        <div class="pil-grup pil-kecil" role="group" aria-label="Saring status">
+          <button type="button" class="pil aktif" data-status="semua" aria-pressed="true">Semua</button>
+          <button type="button" class="pil" data-status="aktif" aria-pressed="false">Aktif</button>
+          <button type="button" class="pil" data-status="trainee" aria-pressed="false">Trainee</button>
+          <button type="button" class="pil" data-status="eks" aria-pressed="false">Eks</button>
+        </div>
+        <ul class="cari-saran" id="cari-saran" role="listbox" hidden></ul>
+        <p class="info-keterangan" id="cari-info">Memuat daftar member…</p>
+      </div>
+
+      <div id="cari-hasil" aria-live="polite"></div>
+    </section>
+
     <p class="info-keterangan info-kaki">
       Data dari member aktif &amp; trainee. Senbatsu = ikut lineup lagu utama single. Jumlah show dan projek tampil otomatis setelah datanya diinput lewat admin.
     </p>

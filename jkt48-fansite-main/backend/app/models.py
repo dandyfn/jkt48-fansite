@@ -86,7 +86,7 @@ class Lencana(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     member_id: Mapped[int] = mapped_column(ForeignKey("members.id"))
-    jenis: Mapped[str] = mapped_column(String(30))                 # kapten / wakil_kapten / ...
+    jenis: Mapped[str] = mapped_column(String(30))                 # kapten / kapten_global / wakil_kapten_global / wakil_kapten / lainnya
     keterangan: Mapped[str | None] = mapped_column(String(100))    # contoh: "Team Love"
     tanggal_mulai: Mapped[date] = mapped_column(Date)
     tanggal_selesai: Mapped[date | None] = mapped_column(Date)     # kosong = masih menjabat

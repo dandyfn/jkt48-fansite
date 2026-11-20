@@ -19,6 +19,7 @@ const LABEL_POIN = {
   iklan: "Projek luar: iklan",
   kapten_baru: "Diangkat jadi kapten team",
   kapten_global_baru: "Diangkat jadi kapten global",
+  wakap_global_baru: "Diangkat jadi wakil kapten global",
   kapten_aktif: "Kapten aktif",
   ssk: "Hasil SSK",
   follower: "Pertumbuhan follower",
@@ -133,7 +134,7 @@ function isiHero(m, baris, statistik, lencana, barisKarier) {
   const elLencana = document.getElementById("detail-lencana");
   elLencana.innerHTML = lencana.map((l) => {
     const kapten = l.jenis === "kapten" || l.jenis === "kapten_global";
-    const nama = { kapten: "Kapten", kapten_global: "Kapten Global", wakil_kapten: "Wakil Kapten", lainnya: "Lencana" }[l.jenis] || l.jenis;
+    const nama = { kapten: "Kapten", kapten_global: "Kapten Global", wakil_kapten_global: "Wakil Kapten Global", wakil_kapten: "Wakil Kapten", lainnya: "Lencana" }[l.jenis] || l.jenis;
     const periode = l.masih_menjabat
       ? `sejak ${tanggal(l.tanggal_mulai)}`
       : `${tanggal(l.tanggal_mulai, { year: "numeric" })}–${tanggal(l.tanggal_selesai, { year: "numeric" })}`;

@@ -112,8 +112,9 @@ Proyek ini juga tempatku **belajar membuat API dan machine learning** dari nol, 
 | ⭐ …dan menjadi center lagu lain (B-side, album, digital) | **+15** |
 | 🎬 Film | **20** |
 | 📺 Iklan | **12** |
+| 👑 Diangkat jadi kapten global (JKT48) | **35** |
+| 🎖️ Diangkat jadi wakil kapten global (JKT48) | **30** |
 | 👑 Diangkat jadi kapten team | **25** |
-| 👑 Diangkat jadi kapten global (JKT48) | **40** |
 | 👑 Selama menjabat kapten (team / global) | **+2** / minggu |
 | 🗳️ SSK peringkat *p* dari *N* peringkat | **(N + 1 − p)**, +10 kalau masuk senbatsu (jumlahnya diisi per SSK, mis. 12 atau 16) |
 

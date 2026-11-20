@@ -4,7 +4,7 @@
 
 const LABEL_JENIS = {
   lagu_baru: "Lagu baru", center: "Center lagu", center_single: "Center single", show: "Show", film: "Film", iklan: "Iklan",
-  kapten_baru: "Kapten team baru", kapten_global_baru: "Kapten global baru", kapten_aktif: "Kapten aktif", ssk: "SSK", follower: "Follower",
+  kapten_baru: "Kapten team baru", kapten_global_baru: "Kapten global baru", wakap_global_baru: "Wakil kapten global baru", kapten_aktif: "Kapten aktif", ssk: "SSK", follower: "Follower",
 };
 
 async function muatDashboard() {

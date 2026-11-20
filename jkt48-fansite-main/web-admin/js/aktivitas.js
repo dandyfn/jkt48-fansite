@@ -275,7 +275,7 @@ document.getElementById("tabel-ssk").addEventListener("click", async (e) => {
 // =====================================================================
 // LENCANA
 // =====================================================================
-const LABEL_LENCANA = { kapten: "Kapten", kapten_global: "Kapten global", wakil_kapten: "Wakil kapten", lainnya: "Lainnya" };
+const LABEL_LENCANA = { kapten: "Kapten", kapten_global: "Kapten global", wakil_kapten_global: "Wakil kapten global", wakil_kapten: "Wakil kapten team", lainnya: "Lainnya" };
 
 async function muatLencana() {
   const daftar = await panggil("/api/lencana").catch(() => []);
@@ -357,5 +357,5 @@ document.getElementById("tabel-lencana").addEventListener("click", async (e) => 
 // Kapten global: keterangan otomatis "JKT48" kalau masih kosong
 document.getElementById("lencana-jenis").addEventListener("change", (e) => {
   const ket = document.getElementById("lencana-keterangan");
-  if (e.target.value === "kapten_global" && !ket.value.trim()) ket.value = "JKT48";
+  if (["kapten_global", "wakil_kapten_global"].includes(e.target.value) && !ket.value.trim()) ket.value = "JKT48";
 });
