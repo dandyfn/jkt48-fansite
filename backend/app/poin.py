@@ -21,6 +21,11 @@ KATEGORI_KE_KODE = {
 }
 
 
+def kode_center(kategori: str) -> str:
+    """Bonus center: lagu utama single pakai 'center_single', lagu lain pakai 'center'."""
+    return "center_single" if kategori == "single" else "center"
+
+
 def nilai_poin(db: Session, kode: str) -> float:
     """Ambil nilai poin terbaru dari tabel jenis_poin."""
     aturan = db.get(models.JenisPoin, kode)

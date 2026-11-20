@@ -167,9 +167,11 @@ class SskEvent(Base):
     judul: Mapped[str] = mapped_column(String(150))
     tanggal_pengumuman: Mapped[date] = mapped_column(Date)
     projek_id: Mapped[int | None] = mapped_column(ForeignKey("projek.id"))  # diisi setelah lagunya rilis
+    jumlah_peringkat: Mapped[int | None] = mapped_column(Integer, default=32)  # berapa member yang diberi peringkat
+    jumlah_senbatsu: Mapped[int | None] = mapped_column(Integer, default=16)   # 12, 16, dst (beda tiap SSK)
 
     hasil: Mapped[list["SskHasil"]] = relationship(
-        cascade="all, delete-orphan", order_by="SskHasil.peringkat")
+        back_populates="event", cascade="all, delete-orphan", order_by="SskHasil.peringkat")
 
 
 class SskHasil(Base):
@@ -177,9 +179,10 @@ class SskHasil(Base):
 
     ssk_event_id: Mapped[int] = mapped_column(ForeignKey("ssk_event.id"), primary_key=True)
     member_id: Mapped[int] = mapped_column(ForeignKey("members.id"), primary_key=True)
-    peringkat: Mapped[int] = mapped_column(Integer)     # 1 - 32
+    peringkat: Mapped[int] = mapped_column(Integer)     # 1 - jumlah_peringkat
 
     member: Mapped["Member"] = relationship()
+    event: Mapped["SskEvent"] = relationship(back_populates="hasil")
 
     @property
     def nama_panggilan(self) -> str:
@@ -187,7 +190,7 @@ class SskHasil(Base):
 
     @property
     def poin(self) -> float:
-        return poin_ssk(self.peringkat)
+        return poin_ssk(self.peringkat, self.event.jumlah_peringkat, self.event.jumlah_senbatsu)
 
 
 # =====================================================================

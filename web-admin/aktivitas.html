@@ -85,11 +85,13 @@
     <!-- ===================== SSK ===================== -->
     <section role="tabpanel" id="tab-ssk" aria-labelledby="t-ssk" class="isi-tab" hidden>
       <form class="panel" id="form-ssk" novalidate>
-        <div class="panel-kepala"><h2>Input hasil SSK</h2><span class="redup kecil">Poin = (33 − peringkat) + 10 untuk peringkat 1–16</span></div>
+        <div class="panel-kepala"><h2>Input hasil SSK</h2><span class="redup kecil">Poin = (jumlah peringkat + 1 − peringkat) + 10 kalau masuk senbatsu</span></div>
         <div class="grid-form tiga">
           <div class="isian"><label for="ssk-judul">Judul SSK / lagu <span class="wajib">*</span></label><input id="ssk-judul" required></div>
           <div class="isian"><label for="ssk-tanggal">Tanggal pengumuman <span class="wajib">*</span></label><input id="ssk-tanggal" type="date" required></div>
           <div class="isian"><label for="ssk-projek">Tautkan ke projek (opsional)</label><select id="ssk-projek"><option value="">–</option></select></div>
+          <div class="isian"><label for="ssk-jumlah">Jumlah peringkat <span class="wajib">*</span></label><input id="ssk-jumlah" type="number" min="1" max="64" value="32" required></div>
+          <div class="isian"><label for="ssk-senbatsu">Jumlah senbatsu <span class="wajib">*</span></label><input id="ssk-senbatsu" type="number" min="1" max="64" value="16" required></div>
         </div>
         <p class="redup kecil">Isi peringkat yang ada saja. Baris yang dibiarkan kosong tidak dikirim.</p>
         <div class="grid-ssk" id="baris-ssk"></div>

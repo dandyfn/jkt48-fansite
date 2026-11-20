@@ -31,7 +31,7 @@ from sqlalchemy import select
 
 from app import models
 from app.database import SessionLocal
-from app.poin import KATEGORI_KE_KODE, catat
+from app.poin import KATEGORI_KE_KODE, catat, kode_center
 from app.schemas import MemberCreate
 from app.sosmed import simpan_snapshot
 
@@ -259,7 +259,7 @@ def impor_projek(db, b: dict, cari: CariMember) -> str:
         catat(db, member_id=m.id, kode=kode, tanggal=tgl, sumber_tabel="projek",
               sumber_id=projek.id, keterangan=judul)
         if is_center and kode == "lagu_baru":
-            catat(db, member_id=m.id, kode="center", tanggal=tgl, sumber_tabel="projek",
+            catat(db, member_id=m.id, kode=kode_center(kategori), tanggal=tgl, sumber_tabel="projek",
                   sumber_id=projek.id, keterangan=f"Center: {judul}")
     return f"{judul} ({len(peserta)} peserta, {len(center)} center)"
 

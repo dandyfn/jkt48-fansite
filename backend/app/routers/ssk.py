@@ -44,7 +44,8 @@ def tambah_ssk(data: SskCreate, db: Session = Depends(get_db)):
         raise HTTPException(400, f"Projek dengan id {data.projek_id} tidak ditemukan")
 
     ssk = models.SskEvent(judul=data.judul, tanggal_pengumuman=data.tanggal_pengumuman,
-                          projek_id=data.projek_id)
+                          projek_id=data.projek_id, jumlah_peringkat=data.jumlah_peringkat,
+                          jumlah_senbatsu=data.jumlah_senbatsu)
     db.add(ssk)
     db.flush()
 
@@ -52,7 +53,7 @@ def tambah_ssk(data: SskCreate, db: Session = Depends(get_db)):
         ssk.hasil.append(models.SskHasil(member_id=h.member_id, peringkat=h.peringkat))
         catat(db, member_id=h.member_id, kode="ssk", tanggal=data.tanggal_pengumuman,
               sumber_tabel="ssk", sumber_id=ssk.id, nilai=h.peringkat,
-              poin=poin_ssk(h.peringkat), keterangan=f"{data.judul} (peringkat {h.peringkat})")
+              poin=poin_ssk(h.peringkat, data.jumlah_peringkat, data.jumlah_senbatsu), keterangan=f"{data.judul} (peringkat {h.peringkat})")
 
     db.commit()
     db.refresh(ssk)

@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 from .. import models
 from ..database import get_db
 from ..keamanan import admin_saja
-from ..poin import KATEGORI_KE_KODE, catat, hapus_dari_sumber, pastikan_member_ada
+from ..poin import KATEGORI_KE_KODE, catat, hapus_dari_sumber, pastikan_member_ada, kode_center
 from ..schemas import ProjekCreate, ProjekOut
 
 router = APIRouter(prefix="/api/projek", tags=["Projek"])
@@ -55,7 +55,7 @@ def tambah_projek(data: ProjekCreate, db: Session = Depends(get_db)):
               sumber_tabel="projek", sumber_id=projek.id, keterangan=data.judul)
         # Bonus center hanya untuk lagu/single JKT48, bukan film/iklan
         if p.is_center and kode == "lagu_baru":
-            catat(db, member_id=p.member_id, kode="center", tanggal=data.tanggal_rilis,
+            catat(db, member_id=p.member_id, kode=kode_center(data.kategori), tanggal=data.tanggal_rilis,
                   sumber_tabel="projek", sumber_id=projek.id, keterangan=f"Center: {data.judul}")
 
     db.commit()

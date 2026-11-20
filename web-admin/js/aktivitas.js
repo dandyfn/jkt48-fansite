@@ -123,7 +123,9 @@ function aturKategori() {
   const jkt = KATEGORI_JKT.includes(pilihKategori.value);
   pemilihProjek.aturModeCenter(jkt);
   document.getElementById("info-poin-projek").textContent = jkt
-    ? "Peserta +10 poin, center +15 poin tambahan"
+    ? (pilihKategori.value === "single"
+        ? "Peserta +10 poin, center single +30 poin tambahan"
+        : "Peserta +10 poin, center +15 poin tambahan")
     : `Peserta +${pilihKategori.value === "film" ? 20 : 12} poin (projek luar)`;
 }
 pilihKategori.addEventListener("change", aturKategori);
@@ -183,24 +185,35 @@ document.getElementById("tabel-projek").addEventListener("click", async (e) => {
 // =====================================================================
 // SSK
 // =====================================================================
-function poinSsk(n) { return 33 - n + (n <= 16 ? 10 : 0); }
+// Jumlah peringkat & senbatsu bisa beda tiap SSK (mis. 32 & 16, atau 24 & 12)
+function angkaSsk() {
+  const batas = (id, cadangan) => Math.min(64, Math.max(1, Number(document.getElementById(id).value) || cadangan));
+  const jumlah = batas("ssk-jumlah", 32);
+  return { jumlah, senbatsu: Math.min(batas("ssk-senbatsu", 16), jumlah) };
+}
+function poinSsk(n, { jumlah, senbatsu }) { return jumlah + 1 - n + (n <= senbatsu ? 10 : 0); }
 
 function buatBarisSsk() {
+  const angka = angkaSsk();
+  const lama = {};                       // simpan pilihan yang sudah diisi supaya tidak hilang
+  document.querySelectorAll("[data-peringkat]").forEach((s) => { if (s.value) lama[s.dataset.peringkat] = s.value; });
   const opsi = `<option value="">–</option>` +
     memberAktif.map((m) => `<option value="${m.id}">${esc(m.nama_panggilan)} (${esc(m.team || "Trainee")})</option>`).join("");
   let html = "";
-  for (let n = 1; n <= 32; n++) {
-    if (n === 1) html += `<p class="judul-blok-ssk">Single utama (1–16)</p>`;
-    if (n === 17) html += `<p class="judul-blok-ssk">Coupling (17–32)</p>`;
+  for (let n = 1; n <= angka.jumlah; n++) {
+    if (n === 1) html += `<p class="judul-blok-ssk">Senbatsu (1–${angka.senbatsu})</p>`;
+    if (n === angka.senbatsu + 1) html += `<p class="judul-blok-ssk">Di luar senbatsu (${n}–${angka.jumlah})</p>`;
     html += `
-      <div class="baris-ssk${n <= 16 ? " utama" : ""}">
+      <div class="baris-ssk${n <= angka.senbatsu ? " utama" : ""}">
         <label for="ssk-${n}" class="no-ssk">${n}</label>
         <select id="ssk-${n}" data-peringkat="${n}">${opsi}</select>
-        <span class="poin-ssk">+${poinSsk(n)}</span>
+        <span class="poin-ssk">+${poinSsk(n, angka)}</span>
       </div>`;
   }
   document.getElementById("baris-ssk").innerHTML = html;
+  Object.entries(lama).forEach(([n, v]) => { const s = document.getElementById(`ssk-${n}`); if (s) s.value = v; });
 }
+["ssk-jumlah", "ssk-senbatsu"].forEach((id) => document.getElementById(id).addEventListener("input", buatBarisSsk));
 
 // Tandai merah kalau satu member dipilih di dua peringkat
 document.getElementById("baris-ssk").addEventListener("change", () => {
@@ -217,7 +230,7 @@ async function muatSsk() {
       <td>${tanggal(s.tanggal_pengumuman)}</td>
       <td><strong>${esc(s.judul)}</strong></td>
       <td>${s.hasil.slice(0, 3).map((h) => `${h.peringkat}. ${esc(h.nama_panggilan)}`).join("<br>")}</td>
-      <td>${s.hasil.length} member</td>
+      <td>${s.hasil.length} member<br><small class="redup">Senbatsu ${s.jumlah_senbatsu ?? 16} dari ${s.jumlah_peringkat ?? 32}</small></td>
       <td class="kanan"><button type="button" class="tombol-kecil bahaya" data-hapus-ssk="${s.id}">Hapus</button></td>
     </tr>`).join("") || `<tr><td colspan="5" class="redup">Belum ada SSK.</td></tr>`;
 }
@@ -231,6 +244,8 @@ document.getElementById("form-ssk").addEventListener("submit", (e) => {
     judul: document.getElementById("ssk-judul").value.trim(),
     tanggal_pengumuman: document.getElementById("ssk-tanggal").value,
     projek_id: Number(document.getElementById("ssk-projek").value) || null,
+    jumlah_peringkat: angkaSsk().jumlah,
+    jumlah_senbatsu: angkaSsk().senbatsu,
     hasil,
   };
   if (!data.judul || !data.tanggal_pengumuman) return beriTahu("Judul dan tanggal pengumuman wajib diisi.", "gagal");
@@ -242,6 +257,7 @@ document.getElementById("form-ssk").addEventListener("submit", (e) => {
     beriTahu(`Hasil SSK "${data.judul}" disimpan · ${hasil.length} member mendapat poin`);
     e.target.reset();
     document.getElementById("ssk-tanggal").value = hariIni();
+    buatBarisSsk();
     await muatSsk();
   });
 });

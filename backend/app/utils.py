@@ -48,9 +48,13 @@ def hitung_lama(mulai: date | None, selesai: date | None = None) -> str | None:
     return f"{tahun} tahun {bulan} bulan"
 
 
-def poin_ssk(peringkat: int) -> float:
-    """Rumus SSK: (33 - peringkat) + bonus 10 untuk peringkat 1-16 (single utama)."""
-    return (33 - peringkat) + (10 if peringkat <= 16 else 0)
+def poin_ssk(peringkat: int, jumlah_peringkat: int | None = 32, jumlah_senbatsu: int | None = 16) -> float:
+    """Rumus SSK: (jumlah peringkat + 1 - peringkat) + bonus 10 kalau masuk senbatsu.
+    Contoh SSK 32 peringkat, senbatsu 16 : peringkat 1 = 32 + 10 = 42, peringkat 17 = 16.
+    Contoh SSK 24 peringkat, senbatsu 12 : peringkat 1 = 24 + 10 = 34, peringkat 13 = 12."""
+    jumlah_peringkat = jumlah_peringkat or 32      # data lama (sebelum kolom ini ada) = 32 / 16
+    jumlah_senbatsu = jumlah_senbatsu or 16
+    return (jumlah_peringkat + 1 - peringkat) + (10 if peringkat <= jumlah_senbatsu else 0)
 
 
 # Nama team resmi, ditulis dengan huruf besar/kecil yang benar.

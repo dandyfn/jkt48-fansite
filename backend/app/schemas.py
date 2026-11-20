@@ -7,7 +7,7 @@
 from datetime import date
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator, model_validator
 
 from .utils import hitung_lama, hitung_umur, hitung_zodiak, rapikan_team
 
@@ -163,7 +163,7 @@ class ShowOut(BaseModel):
 
 class HasilSskIn(BaseModel):
     member_id: int
-    peringkat: int = Field(ge=1, le=32)
+    peringkat: int = Field(ge=1, le=64)
 
 
 class HasilSskOut(BaseModel):
@@ -178,7 +178,18 @@ class SskCreate(BaseModel):
     judul: str = Field(min_length=1, max_length=150)
     tanggal_pengumuman: date
     projek_id: int | None = None
-    hasil: list[HasilSskIn] = Field(min_length=1, max_length=32)
+    jumlah_peringkat: int = Field(default=32, ge=1, le=64)   # berapa member yang diberi peringkat
+    jumlah_senbatsu: int = Field(default=16, ge=1, le=64)    # berapa yang masuk senbatsu (mis. 12 atau 16)
+    hasil: list[HasilSskIn] = Field(min_length=1, max_length=64)
+
+    @model_validator(mode="after")
+    def _cek_jumlah(self):
+        if self.jumlah_senbatsu > self.jumlah_peringkat:
+            raise ValueError("jumlah senbatsu tidak boleh lebih besar dari jumlah peringkat")
+        lebih = [h.peringkat for h in self.hasil if h.peringkat > self.jumlah_peringkat]
+        if lebih:
+            raise ValueError(f"peringkat {lebih} melebihi jumlah peringkat ({self.jumlah_peringkat})")
+        return self
 
 
 class SskOut(BaseModel):
@@ -187,6 +198,8 @@ class SskOut(BaseModel):
     judul: str
     tanggal_pengumuman: date
     projek_id: int | None
+    jumlah_peringkat: int | None = 32
+    jumlah_senbatsu: int | None = 16
     hasil: list[HasilSskOut]
 
 

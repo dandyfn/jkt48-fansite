@@ -12,7 +12,8 @@
 
 const LABEL_POIN = {
   lagu_baru: "Lagu/projek baru",
-  center: "Posisi center",
+  center: "Center lagu",
+  center_single: "Center single",
   show: "Show",
   film: "Projek luar: film",
   iklan: "Projek luar: iklan",

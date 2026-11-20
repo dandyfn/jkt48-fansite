@@ -3,7 +3,7 @@
 // Top 5 minggu ini, dan poin yang terakhir tercatat.
 
 const LABEL_JENIS = {
-  lagu_baru: "Lagu baru", center: "Center", show: "Show", film: "Film", iklan: "Iklan",
+  lagu_baru: "Lagu baru", center: "Center lagu", center_single: "Center single", show: "Show", film: "Film", iklan: "Iklan",
   kapten_baru: "Kapten baru", kapten_aktif: "Kapten aktif", ssk: "SSK", follower: "Follower",
 };
 

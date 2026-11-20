@@ -17,13 +17,14 @@ from app.database import Base, SessionLocal, engine
 ATURAN_POIN = [
     # kode,            nama,                         poin, keterangan
     ("lagu_baru",      "Lagu/projek JKT48 baru",     10,   None),
-    ("center",         "Bonus posisi center",        15,   "Ditambahkan di atas poin lagu baru"),
+    ("center",         "Bonus center lagu lain",     15,   "B-side, album, digital single, projek grup. Ditambahkan di atas poin lagu baru"),
+    ("center_single",  "Bonus center single",        30,   "Center lagu utama single (A-side). Ditambahkan di atas poin lagu baru"),
     ("show",           "Tampil di show",             2,    "Per show"),
     ("film",           "Projek luar: film",          20,   None),
     ("iklan",          "Projek luar: iklan",         12,   None),
     ("kapten_baru",    "Diangkat jadi kapten",       25,   "Sekali, saat diangkat"),
     ("kapten_aktif",   "Masih menjabat kapten",      2,    "Per minggu"),
-    ("ssk",            "Peringkat SSK",              0,    "Rumus: (33 - peringkat) + 10 jika peringkat 1-16"),
+    ("ssk",            "Peringkat SSK",              0,    "Rumus: (jumlah peringkat + 1 - peringkat) + 10 jika masuk senbatsu (jumlah senbatsu diisi per SSK)"),
     ("follower",       "Pertumbuhan follower",       30,   "Poin maksimal, dibagi relatif ke pertumbuhan tertinggi"),
 ]
 
