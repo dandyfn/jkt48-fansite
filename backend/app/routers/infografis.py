@@ -39,7 +39,7 @@ def data_infografis(db: Session = Depends(get_db)):
         .order_by(models.Member.generasi, models.Member.nama_panggilan)
     ).all()
 
-    # Hitung sekaligus untuk SEMUA member (4 query), bukan 1 query per member
+    # Hitung sekaligus untuk SEMUA member (5 query), bukan 1 query per member
     show = _jumlah_per_member(db, select(SM.member_id, func.count()).group_by(SM.member_id))
     lagu = _jumlah_per_member(db, select(MP.member_id, func.count()).join(P)
                               .where(P.kategori.in_(LAGU_JKT)).group_by(MP.member_id))
@@ -48,6 +48,9 @@ def data_infografis(db: Session = Depends(get_db)):
                                 .group_by(MP.member_id))
     projek = _jumlah_per_member(db, select(MP.member_id, func.count()).join(P)
                                 .where(P.kategori.in_(PROJEK_LUAR)).group_by(MP.member_id))
+    # Senbatsu = ikut lineup lagu utama single (kategori "single")
+    senbatsu = _jumlah_per_member(db, select(MP.member_id, func.count()).join(P)
+                                  .where(P.kategori == "single").group_by(MP.member_id))
     saldo = {b.member_id: b for b in db.scalars(select(models.MemberBaseline))}
 
     hasil = []
@@ -68,7 +71,6 @@ def data_infografis(db: Session = Depends(get_db)):
             "total_lagu": lagu.get(m.id, 0) + ((awal.total_lagu_awal or 0) if awal else 0),
             "total_center": center.get(m.id, 0) + ((awal.total_center_awal or 0) if awal else 0),
             "total_projek": projek.get(m.id, 0),
-            # Senbatsu belum punya sumber data (definisinya belum diputuskan)
-            "total_senbatsu": None,
+            "total_senbatsu": senbatsu.get(m.id, 0),
         })
     return hasil

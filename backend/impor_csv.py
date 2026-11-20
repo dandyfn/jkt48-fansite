@@ -6,7 +6,7 @@
 #   .venv\Scripts\python.exe impor_csv.py <jenis> <file>          -> simpan
 #   .venv\Scripts\python.exe impor_csv.py <jenis> <file> --cek    -> cek saja, TIDAK disimpan
 #
-# Jenis: member | akun | show | projek | follower
+# Jenis: member | akun | show | projek | ssk | follower
 # Contoh dengan file Excel (sheet yang dibaca = sheet bernama sama dengan jenis):
 #   .venv\Scripts\python.exe impor_csv.py member data_impor\data_jkt48.xlsx --cek
 # Contoh dengan file CSV:
@@ -33,6 +33,7 @@ from app import models
 from app.database import SessionLocal
 from app.poin import KATEGORI_KE_KODE, catat, kode_center
 from app.schemas import MemberCreate
+from app.utils import poin_ssk
 from app.sosmed import simpan_snapshot
 
 
@@ -277,8 +278,47 @@ def impor_follower(db, b: dict, cari: CariMember) -> str:
     return f"{member.nama_panggilan} {platform} {tgl}: {jumlah:,} ({hasil})".replace(",", ".")
 
 
+def impor_ssk(db, b: dict, cari: CariMember) -> str:
+    """Satu baris = satu member di satu SSK. Baris dengan judul SSK yang sama
+    digabung jadi satu SSK (dibuat otomatis saat baris pertamanya dibaca)."""
+    judul = wajib(b, "judul")
+    tgl = tanggal(b.get("tanggal_pengumuman"), "tanggal_pengumuman", wajib=True)
+    jumlah_peringkat = angka(b.get("jumlah_peringkat"), "jumlah_peringkat") or 32
+    jumlah_senbatsu = angka(b.get("jumlah_senbatsu"), "jumlah_senbatsu") or 16
+    peringkat = angka(wajib(b, "peringkat"), "peringkat")
+    if jumlah_senbatsu > jumlah_peringkat:
+        raise BarisSalah("jumlah_senbatsu tidak boleh lebih besar dari jumlah_peringkat")
+    if not 1 <= peringkat <= jumlah_peringkat:
+        raise BarisSalah(f"peringkat {peringkat} di luar 1-{jumlah_peringkat}")
+    member = cari.satu(wajib(b, "member"))
+
+    E = models.SskEvent
+    ssk = db.scalar(select(E).where(E.judul == judul))
+    if ssk is None:
+        projek_id = None
+        if b.get("projek"):                    # judul lagu utama single yang senbatsunya ditentukan SSK ini
+            P = models.Projek
+            projek_id = db.scalar(select(P.id).where(P.judul == b["projek"], P.kategori == "single"))
+            if projek_id is None:
+                raise BarisSalah(f"projek single '{b['projek']}' tidak ditemukan (import projek dulu)")
+        ssk = E(judul=judul, tanggal_pengumuman=tgl, projek_id=projek_id,
+                jumlah_peringkat=jumlah_peringkat, jumlah_senbatsu=jumlah_senbatsu)
+        db.add(ssk)
+        db.flush()
+    H = models.SskHasil
+    if db.get(H, (ssk.id, member.id)):
+        return f"{judul}: {member.nama_panggilan} sudah ada, dilewati"
+    if db.scalar(select(H.member_id).where(H.ssk_event_id == ssk.id, H.peringkat == peringkat)):
+        raise BarisSalah(f"peringkat {peringkat} di '{judul}' sudah dipakai member lain")
+    db.add(H(ssk_event_id=ssk.id, member_id=member.id, peringkat=peringkat))
+    poin = poin_ssk(peringkat, ssk.jumlah_peringkat, ssk.jumlah_senbatsu)
+    catat(db, member_id=member.id, kode="ssk", tanggal=ssk.tanggal_pengumuman, sumber_tabel="ssk",
+          sumber_id=ssk.id, nilai=peringkat, poin=poin, keterangan=f"{judul} (peringkat {peringkat})")
+    return f"{judul}: #{peringkat} {member.nama_panggilan} (+{poin:g})"
+
+
 PENGIMPOR = {"member": impor_member, "akun": impor_akun, "show": impor_show,
-             "projek": impor_projek, "follower": impor_follower}
+             "projek": impor_projek, "follower": impor_follower, "ssk": impor_ssk}
 
 
 # ---------------------------------------------------------------------
@@ -288,7 +328,7 @@ def main():
     cek_saja = "--cek" in sys.argv
     if len(argumen) != 2 or argumen[0] not in PENGIMPOR:
         print(__doc__ if __doc__ else "")
-        print("Pemakaian: impor_csv.py <member|akun|show|projek|follower> <file.xlsx atau file.csv> [--cek]")
+        print("Pemakaian: impor_csv.py <member|akun|show|projek|ssk|follower> <file.xlsx atau file.csv> [--cek]")
         sys.exit(1)
     jenis, path = argumen
     if not Path(path).exists():

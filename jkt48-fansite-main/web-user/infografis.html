@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Infografis · JKT48 Fan Board</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Nunito:wght@400;600;700;800&family=Zen+Maru+Gothic:wght@500;700;900&display=swap">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="halaman">
+  <div class="dekorasi" id="dekorasi" aria-hidden="true"></div>
+
+  <header class="navbar">
+    <div class="wadah navbar-isi">
+      <a href="index.html" class="logo">
+        <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C12.8 7 17 11.2 24 12C17 12.8 12.8 17 12 24C11.2 17 7 12.8 0 12C7 11.2 11.2 7 12 0Z" fill="currentColor"/></svg>
+        JKT48 Fan Board
+      </a>
+      <nav aria-label="Navigasi utama" class="menu">
+        <a href="index.html">Leaderboard</a>
+        <a href="infografis.html" aria-current="page">Infografis</a>
+        <a href="member.html">Member</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="banner-error" id="banner-error" hidden>
+    <div class="wadah">
+      <strong>API belum menyala.</strong>
+      Nyalakan backend dulu (uvicorn di folder backend), lalu muat ulang halaman ini.
+    </div>
+  </div>
+
+  <main class="wadah section info">
+    <!-- ============ JUDUL + PILIHAN CAKUPAN ============ -->
+    <section class="info-atas">
+      <p class="kicker">インフォグラフィック · INFOGRAFIS</p>
+      <h1 class="judul-besar">Angka-angka di balik para member</h1>
+      <p class="teks-redup">
+        Siapa yang paling sering tampil, paling sering masuk senbatsu, paling banyak membawakan lagu dan projek,
+        paling tinggi, dan siapa yang tertua atau termuda. Bandingkan semua member sekaligus, atau per generasi.
+      </p>
+
+      <div class="info-filter">
+        <div class="info-filter-baris">
+          <span class="info-label">Bandingkan</span>
+          <div class="pil-grup" role="group" aria-label="Cakupan perbandingan">
+            <button type="button" class="pil aktif" data-cakupan="semua" aria-pressed="true">Semua member</button>
+            <button type="button" class="pil" data-cakupan="gen" aria-pressed="false">Per generasi</button>
+          </div>
+          <span class="info-keterangan" id="keterangan-cakupan">Memuat…</span>
+        </div>
+        <!-- Tombol Gen 3 ... Gen 14, dibuat oleh infografis.js -->
+        <div class="info-gen" id="pilih-gen" role="group" aria-label="Pilih generasi" hidden></div>
+      </div>
+    </section>
+
+    <!-- ============ JUARA KATEGORI ============ -->
+    <section aria-labelledby="judul-juara">
+      <div class="judul-baris info-judul">
+        <h2 class="info-h2" id="judul-juara">Juara kategori <span class="merah" id="judul-cakupan">semua member</span></h2>
+        <span class="info-keterangan">Top 5 di setiap kategori · nilai sama = peringkat sama</span>
+      </div>
+      <div class="grid-juara" id="grid-juara">
+        <p class="memuat">Memuat infografis…</p>
+      </div>
+    </section>
+
+    <!-- ============ STATISTIK PER GENERASI ============ -->
+    <section aria-labelledby="judul-gen">
+      <div class="info-judul">
+        <p class="kicker">期別 · PER GENERASI</p>
+        <h2 class="info-h2" id="judul-gen">Statistik per generasi</h2>
+        <p class="info-keterangan" id="petunjuk-gen">Pilih "Per generasi" di atas untuk melihat bagian setiap member.</p>
+      </div>
+      <div class="grid-tiga" id="grafik-lingkaran"></div>
+    </section>
+
+    <p class="info-keterangan info-kaki">
+      Data dari member aktif &amp; trainee. Senbatsu = ikut lineup lagu utama single. Jumlah show dan projek tampil otomatis setelah datanya diinput lewat admin.
+    </p>
+  </main>
+
+  <!-- Jendela "Lihat semua": peringkat lengkap satu kategori -->
+  <dialog class="dialog-peringkat" id="dialog-peringkat" aria-labelledby="dialog-judul">
+    <div class="dialog-kepala">
+      <div>
+        <p class="juara-mahkota" id="dialog-cakupan"></p>
+        <h2 id="dialog-judul">Peringkat lengkap</h2>
+        <p class="info-keterangan" id="dialog-sub"></p>
+      </div>
+      <button type="button" class="tombol-tutup" id="dialog-tutup" aria-label="Tutup">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <ol class="daftar-top daftar-lengkap" id="dialog-daftar"></ol>
+  </dialog>
+
+  <footer class="footer">
+    <div class="wadah footer-isi">
+      <span class="logo-footer">JKT48 Fan Board</span>
+      <span>Fansite tidak resmi, dibuat oleh fans untuk fans. Hak cipta foto milik pemiliknya masing-masing.</span>
+    </div>
+  </footer>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/dekorasi.js"></script>
+<script src="js/infografis.js"></script>
+</body>
+</html>
