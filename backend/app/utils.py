@@ -48,6 +48,10 @@ def hitung_lama(mulai: date | None, selesai: date | None = None) -> str | None:
     return f"{tahun} tahun {bulan} bulan"
 
 
+# Jenis lencana yang dihitung sebagai kapten (bingkai kapten + poin kapten aktif per minggu)
+JENIS_KAPTEN = ("kapten", "kapten_global")
+
+
 def poin_ssk(peringkat: int, jumlah_peringkat: int | None = 32, jumlah_senbatsu: int | None = 16) -> float:
     """Rumus SSK: (jumlah peringkat + 1 - peringkat) + bonus 10 kalau masuk senbatsu.
     Contoh SSK 32 peringkat, senbatsu 16 : peringkat 1 = 32 + 10 = 42, peringkat 17 = 16.

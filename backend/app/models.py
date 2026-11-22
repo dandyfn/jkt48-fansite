@@ -12,7 +12,7 @@ from sqlalchemy import (Boolean, Date, DateTime, Float, ForeignKey, Integer,
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .database import Base
-from .utils import poin_ssk
+from .utils import JENIS_KAPTEN, poin_ssk
 
 
 # =====================================================================
@@ -52,9 +52,9 @@ class Member(Base):
         Jabatan dianggap sudah berakhir PADA tanggal_selesai."""
         hari_ini = date.today()
         for l in self.lencana:
-            if (l.jenis == "kapten" and l.tanggal_mulai <= hari_ini
+            if (l.jenis in JENIS_KAPTEN and l.tanggal_mulai <= hari_ini
                     and (l.tanggal_selesai is None or l.tanggal_selesai > hari_ini)):
-                return l.keterangan or "Kapten"
+                return l.keterangan or ("JKT48" if l.jenis == "kapten_global" else "Kapten")
         return None
 
 
@@ -86,7 +86,7 @@ class Lencana(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     member_id: Mapped[int] = mapped_column(ForeignKey("members.id"))
-    jenis: Mapped[str] = mapped_column(String(30))                 # kapten / wakil_kapten / ...
+    jenis: Mapped[str] = mapped_column(String(30))                 # kapten / kapten_global / wakil_kapten_global / wakil_kapten / lainnya
     keterangan: Mapped[str | None] = mapped_column(String(100))    # contoh: "Team Love"
     tanggal_mulai: Mapped[date] = mapped_column(Date)
     tanggal_selesai: Mapped[date | None] = mapped_column(Date)     # kosong = masih menjabat

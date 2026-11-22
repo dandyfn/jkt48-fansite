@@ -13,7 +13,10 @@ const keadaan = {
   cakupan: "semua",  // "semua" atau "gen"
   gen: null,         // generasi yang dipilih (angka)
   urutUmur: "tua",   // "tua" atau "muda"
+  allTime: false,    // true = ikut sertakan member eks (centang "Member all time")
 };
+
+let MEMBER_AKTIF = []; // aktif & trainee (dari /api/infografis)
 
 let MEMBER = [];     // data dari API
 let DAFTAR_GEN = []; // [3, 6, 7, ...]
@@ -41,7 +44,7 @@ const KATEGORI = [
     catatan: "Dari sheet show + saldo awal total show." },
   { kolom: "total_senbatsu", judul: "Paling banyak senbatsu", sub: "masuk lineup single utama", satuan: "kali",
     ikon: "senbatsu", warnaIkon: ["#F6E7B8", "#5C4300"],
-    catatan: "Butuh data baru: tanda senbatsu pada lineup setiap single." },
+    catatan: "Dari lineup lagu utama (A-side) setiap single." },
   { kolom: "total_lagu", judul: "Paling banyak bawa lagu", sub: "lagu yang pernah dibawakan", satuan: "lagu",
     ikon: "lagu", warnaIkon: ["#ECE6FA", "#5B3FA8"],
     catatan: "Dari total lagu awal + lagu baru yang tercatat di web." },
@@ -61,7 +64,7 @@ const KATEGORI = [
 // ----------------------------------------------------------------------
 const jumlah = (angka) => angka.reduce((a, b) => a + b, 0);
 const memberGen = (g) => MEMBER.filter((m) => m.generasi === g);
-const labelTeamPendek = (m) => (m.team ? `Team ${m.team}` : "Trainee");
+const labelTeamPendek = (m) => (m.team ? `Team ${m.team}` : m.status === "eks" ? "Eks" : "Trainee");
 
 // Member yang sedang dibandingkan (semua, atau satu generasi)
 function kolam() {
@@ -95,11 +98,15 @@ function gambarPilihanGen() {
       <span>Gen ${g}</span><small>${JUMLAH_PER_GEN[g]} member</small>
     </button>`).join("");
 
+  const jenis = keadaan.allTime ? "member all time (aktif, trainee, eks)" : "member aktif & trainee";
   document.getElementById("keterangan-cakupan").textContent = keadaan.cakupan === "gen"
-    ? `Generasi ${keadaan.gen} · ${JUMLAH_PER_GEN[keadaan.gen]} member`
-    : `${MEMBER.length} member aktif & trainee`;
+    ? `Generasi ${keadaan.gen} · ${JUMLAH_PER_GEN[keadaan.gen]} ${keadaan.allTime ? "member all time" : "member"}`
+    : `${MEMBER.length} ${jenis}`;
   document.getElementById("judul-cakupan").textContent =
-    keadaan.cakupan === "gen" ? `Gen ${keadaan.gen}` : "semua member";
+    (keadaan.cakupan === "gen" ? `Gen ${keadaan.gen}` : "semua member") + (keadaan.allTime ? " · all time" : "");
+  document.getElementById("kaki-cakupan").textContent = keadaan.allTime
+    ? "Data dari semua member sepanjang masa (aktif, trainee, eks). Total lagu & center member eks hanya dari lagu yang tercatat."
+    : 'Data dari member aktif & trainee. Centang "Member all time" untuk ikut menghitung member eks.';
   document.getElementById("petunjuk-gen").textContent = keadaan.cakupan === "gen"
     ? `Bagian setiap member Gen ${keadaan.gen}: sudah berapa kali ikut lagu, jadi center, dan masuk senbatsu.`
     : 'Pembagian per generasi. Pilih "Per generasi" di atas untuk melihat bagian setiap member.';
@@ -137,7 +144,8 @@ function lebarBatang(kat, nilai, daftar) {
 
 function kartuJuara(kat, indeks) {
   const menunggu = belumAdaData(kat.kolom);
-  const mahkota = keadaan.cakupan === "gen" ? `JUARA GEN ${keadaan.gen}` : "JUARA SEMUA MEMBER";
+  const mahkota = (keadaan.cakupan === "gen" ? `JUARA GEN ${keadaan.gen}` : "JUARA SEMUA MEMBER")
+    + (keadaan.allTime ? " · ALL TIME" : "");
   const [bgIkon, fgIkon] = kat.warnaIkon;
 
   const tombolUmur = kat.umur ? `
@@ -167,7 +175,7 @@ function kartuJuara(kat, indeks) {
     const daftar = top5(kat);
     const satu = daftar.filter((m) => m.peringkat === 1);
     const m = daftar[0];
-    let meta = `Gen ${m.generasi} · ${labelTeamPendek(m)}`;
+    let meta = `Gen ${m.generasi} · ${labelTeamPendek(m)}${m.status === "eks" ? " · Eks" : ""}`;
     if (kat.umur) meta = `Lahir ${tanggal(m.tanggal_lahir)} · Gen ${m.generasi}`;
     if (satu.length > 1) meta = `Seri dengan ${satu.slice(1).map((s) => s.nama_panggilan).join(", ")}`;
     juara = `
@@ -227,7 +235,10 @@ function grafikLingkaran({ judul, kolom, catatan }) {
 
   const total = jumlah(potong.map((p) => p.nilai));
   const persen = (v) => `${Math.round((v / (total || 1)) * 100)}%`;
-  const warna = (i) => (menunggu ? (i % 2 ? "#EFE7EB" : "#E2D6DC") : WARNA[i % WARNA.length]);
+  // Lebih dari 14 potongan (mis. Gen 3 all time = 31 member): 13 terbesar berwarna, sisanya abu-abu
+  const banyak = potong.length > WARNA.length;
+  const warna = (i) => (menunggu ? (i % 2 ? "#EFE7EB" : "#E2D6DC")
+    : banyak && i >= WARNA.length - 1 ? "#CFC3C9" : WARNA[i % WARNA.length]);
 
   // conic-gradient: setiap potongan mulai dari jam 12, searah jarum jam
   let sudut = 0;
@@ -265,6 +276,7 @@ function grafikLingkaran({ judul, kolom, catatan }) {
         <div class="donat-tengah${perMember && !menunggu ? " sorot" : ""}"><strong>${tengahAngka}</strong><span>${tengahLabel}</span></div>
       </div>
       ${kosong ? `<p class="info-keterangan" style="text-align:center">Belum ada di generasi ini.</p>` : ""}
+      ${banyak && !menunggu ? `<p class="info-keterangan" style="text-align:center">13 terbesar berwarna, ${potong.length - 13} lainnya abu-abu.</p>` : ""}
       <ul class="legenda${perMember ? " legenda-member" : ""}">${legenda}</ul>
       <p class="kartu-catatan">${perMember ? catatan.member : catatan.gen}</p>
     </article>`;
@@ -279,8 +291,8 @@ function gambarLingkaran() {
       gen: "Generasi yang belum pernah dapat posisi center tidak muncul di lingkaran, hanya di legenda.",
       member: "Member yang belum pernah jadi center tidak muncul di lingkaran, hanya di legenda." } }),
     grafikLingkaran({ judul: "Jumlah senbatsu", kolom: "total_senbatsu", catatan: {
-      gen: "Angka asli tampil setelah lineup senbatsu diinput.",
-      member: "Angka asli tampil setelah lineup senbatsu diinput." } }),
+      gen: "Senbatsu = ikut lineup lagu utama single.",
+      member: "Persentase = senbatsu member itu dibagi total senbatsu satu generasi." } }),
   ].join("");
 }
 
@@ -293,7 +305,7 @@ function bukaPeringkatLengkap(kat) {
   const daftar = urutkan(kat);
   const nilaiSemua = daftar.map((m) => m[kat.kolom]);
   document.getElementById("dialog-cakupan").textContent =
-    keadaan.cakupan === "gen" ? `GEN ${keadaan.gen}` : "SEMUA MEMBER";
+    (keadaan.cakupan === "gen" ? `GEN ${keadaan.gen}` : "SEMUA MEMBER") + (keadaan.allTime ? " · ALL TIME" : "");
   document.getElementById("dialog-judul").textContent =
     kat.umur ? `Urutan umur (${keadaan.urutUmur === "tua" ? "tertua" : "termuda"} dulu)` : kat.judul;
   document.getElementById("dialog-sub").textContent =
@@ -353,22 +365,202 @@ document.getElementById("grid-juara").addEventListener("click", (e) => {
 });
 
 // ----------------------------------------------------------------------
+// 5) Cari member: semua member (aktif, trainee, eks)
+//    Data: GET /api/infografis?termasuk_eks=true
+//    Peringkat dihitung dibanding SEMUA member sepanjang sejarah.
+// ----------------------------------------------------------------------
+let SEMUA = [];                                  // semua member termasuk eks
+const cari = { status: "semua", pilih: -1, saran: [] };
+const LABEL_STATUS = { aktif: "Aktif", trainee: "Trainee", eks: "Eks" };
+
+// Ubin di kartu hasil: strukturnya sama dengan 6 kartu juara + center + SSK
+const UBIN = [
+  { kolom: "total_show", judul: "Show", satuan: "show", ikon: "show", warna: KATEGORI[0].warnaIkon },
+  { kolom: "total_senbatsu", judul: "Senbatsu", satuan: "kali", ikon: "senbatsu", warna: KATEGORI[1].warnaIkon },
+  { kolom: "total_lagu", judul: "Lagu", satuan: "lagu", ikon: "lagu", warna: KATEGORI[2].warnaIkon },
+  { kolom: "total_center", judul: "Center", satuan: "kali", ikon: "senbatsu", warna: ["#FDE3E3", "#8E0C22"] },
+  { kolom: "tinggi_cm", judul: "Tinggi", satuan: "cm", ikon: "tinggi", warna: KATEGORI[3].warnaIkon },
+  { kolom: "umur", judul: "Umur", satuan: "tahun", ikon: "umur", warna: KATEGORI[4].warnaIkon, umur: true },
+  { kolom: "total_projek", judul: "Projek luar", satuan: "projek", ikon: "projek", warna: KATEGORI[5].warnaIkon },
+  { kolom: "ssk_terbaik", judul: "SSK terbaik", satuan: "", ikon: "senbatsu", warna: ["#F6E7B8", "#5C4300"], ssk: true },
+];
+
+const normal = (t) => (t || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+// Peringkat satu member di satu ubin, dibanding semua member yang punya nilainya
+function peringkatDiSemua(ubin, m) {
+  let daftar;
+  if (ubin.umur) {
+    if (!m.tanggal_lahir) return null;
+    daftar = SEMUA.filter((x) => x.tanggal_lahir).sort((a, b) => a.tanggal_lahir.localeCompare(b.tanggal_lahir));
+    const urut = beriPeringkat(daftar, (x) => x.tanggal_lahir);
+    return { posisi: urut.find((x) => x.id === m.id).peringkat, dari: urut.length, kata: "tertua" };
+  }
+  if (ubin.ssk) {
+    if (!m.ssk_terbaik) return null;
+    daftar = SEMUA.filter((x) => x.ssk_terbaik).sort((a, b) => a.ssk_terbaik - b.ssk_terbaik);
+  } else {
+    if (!(m[ubin.kolom] > 0)) return null;
+    daftar = SEMUA.filter((x) => x[ubin.kolom] > 0).sort((a, b) => b[ubin.kolom] - a[ubin.kolom]);
+  }
+  const urut = beriPeringkat(daftar, (x) => x[ubin.kolom]);
+  return { posisi: urut.find((x) => x.id === m.id).peringkat, dari: urut.length, kata: "" };
+}
+
+function teksPeriode(m) {
+  const mulai = m.tanggal_bergabung ? tanggal(m.tanggal_bergabung, { month: "short", year: "numeric" }) : "?";
+  if (m.status === "eks") {
+    const akhir = m.tanggal_lulus ? tanggal(m.tanggal_lulus, { month: "short", year: "numeric" }) : "?";
+    return `${mulai} – ${akhir}`;
+  }
+  return `${mulai} – sekarang`;
+}
+
+function kartuHasil(m) {
+  const indeks = SEMUA.indexOf(m);
+  const ubin = UBIN.map((u) => {
+    const nilai = u.ssk ? (m.ssk_terbaik ? `#${m.ssk_terbaik}` : null) : m[u.kolom];
+    const ada = nilai !== null && nilai !== undefined;
+    const p = peringkatDiSemua(u, m);
+    const [bg, fg] = u.warna;
+    return `
+      <div class="ubin">
+        <span class="juara-ikon kecil" style="background:${bg}" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${fg}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${IKON[u.ikon]}"/></svg>
+        </span>
+        <span class="ubin-judul">${u.judul}</span>
+        <strong class="ubin-angka">${ada ? (u.ssk ? esc(nilai) : angka(nilai)) : "–"}${ada && u.satuan ? ` <small>${u.satuan}</small>` : ""}</strong>
+        <span class="ubin-peringkat">${p ? `Peringkat ${p.kata ? p.kata + " " : ""}<b>#${p.posisi}</b> dari ${p.dari}` : (u.ssk ? "Belum pernah ikut SSK" : "Belum ada data")}</span>
+      </div>`;
+  }).join("");
+
+  return `
+    <article class="kartu-cari">
+      <div class="cari-kepala">
+        <div class="juara-foto">${htmlFoto(m, indeks)}</div>
+        <div class="cari-identitas">
+          <span class="lencana-status status-${m.status}">${LABEL_STATUS[m.status] || esc(m.status)}</span>
+          <h3>${esc(m.nama_panggilan)}</h3>
+          <p>${esc(m.nama_lengkap || "")}</p>
+          <p class="redup-kecil">Gen ${m.generasi} · ${esc(m.team ? `Team ${m.team}` : m.status === "trainee" ? "Trainee" : "–")} · ${esc(teksPeriode(m))}</p>
+        </div>
+        <a class="tombol-lengkap cari-profil" href="detail.html?id=${m.id}">Lihat profil
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
+      </div>
+      <div class="grid-ubin">${ubin}</div>
+      <p class="kartu-catatan">Peringkat dibanding ${SEMUA.length} member (aktif, trainee, eks). Nilai sama = peringkat sama.
+        Total lagu & center member eks hanya dari lagu yang tercatat (single, album, digital, projek grup).</p>
+    </article>`;
+}
+
+function gambarSaran() {
+  const input = document.getElementById("cari-input");
+  const kata = normal(input.value.trim());
+  const daftar = SEMUA.filter((m) => cari.status === "semua" || m.status === cari.status);
+  cari.saran = kata
+    ? daftar.filter((m) => normal(m.nama_panggilan).includes(kata) || normal(m.nama_lengkap).includes(kata))
+        .sort((a, b) => (normal(b.nama_panggilan).startsWith(kata) - normal(a.nama_panggilan).startsWith(kata))
+          || a.generasi - b.generasi)
+        .slice(0, 8)
+    : [];
+  const ul = document.getElementById("cari-saran");
+  ul.innerHTML = cari.saran.map((m, i) => `
+    <li role="option" id="saran-${i}" data-id="${m.id}" aria-selected="${i === cari.pilih}" class="${i === cari.pilih ? "dipilih" : ""}">
+      <strong>${esc(m.nama_panggilan)}</strong>
+      <span>${esc(m.nama_lengkap || "")}</span>
+      <small>Gen ${m.generasi} · ${LABEL_STATUS[m.status] || esc(m.status)}</small>
+    </li>`).join("");
+  const buka = cari.saran.length > 0;
+  ul.hidden = !buka;
+  input.setAttribute("aria-expanded", String(buka));
+  if (cari.pilih >= 0) input.setAttribute("aria-activedescendant", `saran-${cari.pilih}`);
+  else input.removeAttribute("aria-activedescendant");
+  document.getElementById("cari-info").textContent = kata && !buka
+    ? "Tidak ada member yang cocok."
+    : `${daftar.length} member bisa dicari${cari.status === "semua" ? " (aktif, trainee, eks)" : ""}.`;
+}
+
+function tampilkanMember(id) {
+  const m = SEMUA.find((x) => x.id === Number(id));
+  if (!m) return;
+  document.getElementById("cari-input").value = m.nama_panggilan;
+  cari.saran = []; cari.pilih = -1;
+  document.getElementById("cari-saran").hidden = true;
+  document.getElementById("cari-input").setAttribute("aria-expanded", "false");
+  document.getElementById("cari-hasil").innerHTML = kartuHasil(m);
+}
+
+(function pasangCari() {
+  const input = document.getElementById("cari-input");
+  input.addEventListener("input", () => { cari.pilih = -1; gambarSaran(); });
+  input.addEventListener("keydown", (e) => {
+    if (!cari.saran.length) return;
+    if (e.key === "ArrowDown") { cari.pilih = (cari.pilih + 1) % cari.saran.length; gambarSaran(); e.preventDefault(); }
+    else if (e.key === "ArrowUp") { cari.pilih = (cari.pilih - 1 + cari.saran.length) % cari.saran.length; gambarSaran(); e.preventDefault(); }
+    else if (e.key === "Enter") { tampilkanMember(cari.saran[Math.max(cari.pilih, 0)].id); e.preventDefault(); }
+    else if (e.key === "Escape") { document.getElementById("cari-saran").hidden = true; }
+  });
+  document.getElementById("cari-saran").addEventListener("click", (e) => {
+    const li = e.target.closest("[data-id]");
+    if (li) tampilkanMember(li.dataset.id);
+  });
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".cari-kotak")) document.getElementById("cari-saran").hidden = true;
+  });
+  document.querySelectorAll("[data-status]").forEach((t) => t.addEventListener("click", () => {
+    cari.status = t.dataset.status;
+    document.querySelectorAll("[data-status]").forEach((x) => {
+      x.classList.toggle("aktif", x === t);
+      x.setAttribute("aria-pressed", String(x === t));
+    });
+    cari.pilih = -1;
+    gambarSaran();
+  }));
+})();
+
+// Ganti kumpulan member yang dibandingkan (aktif saja <-> all time), lalu gambar ulang
+function pakaiKumpulan(daftar) {
+  MEMBER = daftar;
+  DAFTAR_GEN = [...new Set(MEMBER.map((m) => m.generasi))].sort((a, b) => a - b);
+  JUMLAH_PER_GEN = {};
+  DAFTAR_GEN.forEach((g) => (JUMLAH_PER_GEN[g] = memberGen(g).length));
+  // Generasi yang sedang dipilih tetap dipakai kalau masih ada; kalau tidak, pilih yang membernya terbanyak
+  if (!DAFTAR_GEN.includes(keadaan.gen)) {
+    keadaan.gen = DAFTAR_GEN.reduce((a, b) => (JUMLAH_PER_GEN[b] > JUMLAH_PER_GEN[a] ? b : a));
+  }
+  gambarSemua();
+}
+
+document.getElementById("centang-alltime").addEventListener("change", (e) => {
+  keadaan.allTime = e.target.checked;
+  pakaiKumpulan(keadaan.allTime ? SEMUA : MEMBER_AKTIF);
+});
+
+async function muatSemuaMember() {
+  try {
+    SEMUA = await ambil("/api/infografis?termasuk_eks=true");
+    document.getElementById("centang-alltime").disabled = false;
+    gambarSaran();
+  } catch (e) {
+    document.getElementById("cari-info").textContent = "Daftar member gagal dimuat.";
+  }
+}
+
+// ----------------------------------------------------------------------
 // Mulai
 // ----------------------------------------------------------------------
 (async function mulai() {
+  muatSemuaMember();               // kotak "Cari member" dimuat terpisah
   try {
-    MEMBER = await ambil("/api/infografis");
+    MEMBER_AKTIF = await ambil("/api/infografis");
   } catch (e) {
     document.getElementById("grid-juara").innerHTML = `<p class="memuat">Infografis gagal dimuat.</p>`;
     return;
   }
-  if (MEMBER.length === 0) {
+  if (MEMBER_AKTIF.length === 0) {
     document.getElementById("grid-juara").innerHTML = `<p class="memuat">Belum ada member aktif atau trainee.</p>`;
     return;
   }
-  DAFTAR_GEN = [...new Set(MEMBER.map((m) => m.generasi))].sort((a, b) => a - b);
-  DAFTAR_GEN.forEach((g) => (JUMLAH_PER_GEN[g] = memberGen(g).length));
-  // Generasi default saat "Per generasi" dipilih: generasi dengan member terbanyak
-  keadaan.gen = DAFTAR_GEN.reduce((a, b) => (JUMLAH_PER_GEN[b] > JUMLAH_PER_GEN[a] ? b : a));
-  gambarSemua();
+  // Generasi default saat "Per generasi" dipilih: generasi dengan member terbanyak (diatur di pakaiKumpulan)
+  pakaiKumpulan(MEMBER_AKTIF);
 })();

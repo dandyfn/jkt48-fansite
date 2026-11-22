@@ -1,15 +1,17 @@
 # routers/infografis.py
 # Data untuk halaman Infografis (web-user/infografis.html).
 #
-#   GET /api/infografis -> satu baris per member aktif & trainee, berisi semua angka
-#                          yang dibandingkan: tinggi, umur, total show, lagu, center,
-#                          projek luar, dan senbatsu.
+#   GET /api/infografis                  -> satu baris per member aktif & trainee, berisi semua angka
+#                                           yang dibandingkan: tinggi, umur, total show, lagu, center,
+#                                           projek luar, dan senbatsu.
+#   GET /api/infografis?termasuk_eks=true -> sama, tapi untuk SEMUA member (aktif, trainee, eks).
+#                                           Dipakai kotak pencarian "Cari member" di halaman infografis.
 #
 # Kenapa dikirim per member, bukan sudah dirangkum per generasi?
 # Karena halaman infografis bisa diganti-ganti (semua member / per generasi,
 # tertua / termuda) tanpa minta data ulang. Merangkumnya cukup di JavaScript.
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
@@ -30,12 +32,14 @@ def _jumlah_per_member(db: Session, query) -> dict[int, int]:
 
 
 @router.get("", response_model=list[InfografisMember])
-def data_infografis(db: Session = Depends(get_db)):
+def data_infografis(termasuk_eks: bool = Query(False, description="true = ikut sertakan member eks"),
+                    db: Session = Depends(get_db)):
     MP, P, SM = models.MemberProjek, models.Projek, models.ShowMember
+    status = ["aktif", "trainee", "eks"] if termasuk_eks else ["aktif", "trainee"]
 
     members = db.scalars(
         select(models.Member)
-        .where(models.Member.status.in_(["aktif", "trainee"]))
+        .where(models.Member.status.in_(status))
         .order_by(models.Member.generasi, models.Member.nama_panggilan)
     ).all()
 
@@ -52,6 +56,9 @@ def data_infografis(db: Session = Depends(get_db)):
     senbatsu = _jumlah_per_member(db, select(MP.member_id, func.count()).join(P)
                                   .where(P.kategori == "single").group_by(MP.member_id))
     saldo = {b.member_id: b for b in db.scalars(select(models.MemberBaseline))}
+    # Peringkat SSK terbaik tiap member (angka terkecil)
+    H = models.SskHasil
+    ssk_terbaik = _jumlah_per_member(db, select(H.member_id, func.min(H.peringkat)).group_by(H.member_id))
 
     hasil = []
     for m in members:
@@ -72,5 +79,9 @@ def data_infografis(db: Session = Depends(get_db)):
             "total_center": center.get(m.id, 0) + ((awal.total_center_awal or 0) if awal else 0),
             "total_projek": projek.get(m.id, 0),
             "total_senbatsu": senbatsu.get(m.id, 0),
+            "nama_lengkap": m.nama_lengkap,
+            "tanggal_bergabung": m.tanggal_bergabung,
+            "tanggal_lulus": m.tanggal_lulus,
+            "ssk_terbaik": ssk_terbaik.get(m.id),
         })
     return hasil

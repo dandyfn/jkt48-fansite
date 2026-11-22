@@ -2,7 +2,7 @@
 # "Mesin hitung" leaderboard. Tidak menyimpan apa-apa; hanya menghitung.
 #
 # Skor satu member dalam satu periode =
-#     jumlah poin aktivitas di periode itu (show, lagu, center, SSK, iklan, film, kapten baru)
+#     jumlah poin aktivitas di periode itu (show, lagu, center, SSK, iklan, film, kapten team/global baru)
 #   + poin kapten aktif   (per minggu selama menjabat)
 #   + poin follower       (pertumbuhan % dibanding pertumbuhan tertinggi, maks 30)
 #
@@ -20,6 +20,7 @@ from sqlalchemy.orm import Session
 from . import models
 from .config import settings
 from .poin import nilai_poin
+from .utils import JENIS_KAPTEN
 
 TOP_STREAK = 5          # masuk Top berapa supaya streak bertambah
 BATAS_STREAK = 104      # maksimal menghitung mundur 2 tahun
@@ -153,7 +154,7 @@ def hitung(db: Session, jenis: str, tanggal: date) -> tuple[date, date, list[dic
 
     L = models.Lencana
     jabatan_kapten: dict[int, list] = {}
-    for l in db.scalars(select(L).where(L.jenis == "kapten", L.tanggal_mulai <= selesai)):
+    for l in db.scalars(select(L).where(L.jenis.in_(JENIS_KAPTEN), L.tanggal_mulai <= selesai)):
         if (l.tanggal_selesai or date.max) >= mulai:
             jabatan_kapten.setdefault(l.member_id, []).append(l)
 

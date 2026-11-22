@@ -207,13 +207,13 @@ class SskOut(BaseModel):
 # LENCANA (kapten, wakil kapten, dll)
 # =====================================================================
 
-JenisLencana = Literal["kapten", "wakil_kapten", "lainnya"]
+JenisLencana = Literal["kapten", "kapten_global", "wakil_kapten_global", "wakil_kapten", "lainnya"]
 
 
 class LencanaCreate(BaseModel):
     member_id: int
     jenis: JenisLencana
-    keterangan: str | None = None       # contoh: "Team Love"
+    keterangan: str | None = None       # contoh: "Team Love" (kapten team) atau "JKT48" (kapten global)
     tanggal_mulai: date
     tanggal_selesai: date | None = None
 
@@ -455,6 +455,11 @@ class InfografisMember(BaseModel):
     total_center: int
     total_projek: int
     total_senbatsu: int | None
+    # dipakai kotak "Cari member" (semua member termasuk eks)
+    nama_lengkap: str | None = None
+    tanggal_bergabung: date | None = None
+    tanggal_lulus: date | None = None
+    ssk_terbaik: int | None = None          # peringkat SSK terbaik (None = belum pernah ikut)
 
 
 class StatistikMember(BaseModel):

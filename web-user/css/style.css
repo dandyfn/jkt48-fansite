@@ -436,3 +436,46 @@ main, .footer { position: relative; z-index: 1; }
 .daftar-lengkap .nama small { display: block; font-size: 12px; font-weight: 700; color: var(--redup); }
 .daftar-lengkap .nilai small { font-size: 12px; font-weight: 700; color: var(--redup); }
 .legenda-member .gen { overflow: hidden; text-overflow: ellipsis; }
+
+/* ---------- Cari member (infografis) ---------- */
+.cari-blok { margin-top: 56px; }
+.cari-kotak { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; margin-top: 16px; }
+.cari-input-wadah { flex: 1 1 320px; display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 18px; border: 1px solid var(--garis); border-radius: 999px; background: var(--putih); color: var(--redup); }
+.cari-input-wadah:focus-within { border-color: var(--merah); box-shadow: 0 0 0 3px rgba(200,16,46,.15); }
+.cari-input-wadah input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font-family: var(--font-teks); font-size: 16px; color: var(--tinta); }
+.cari-kotak > .info-keterangan { flex-basis: 100%; margin: 0; }
+.cari-saran { position: absolute; z-index: 5; top: 58px; left: 0; width: min(520px, 100%); margin: 0; padding: 6px; list-style: none; background: var(--putih); border: 1px solid var(--garis); border-radius: 20px; box-shadow: 0 16px 40px rgba(43,27,51,.15); max-height: 380px; overflow: auto; }
+.cari-saran li { display: grid; grid-template-columns: auto 1fr auto; align-items: baseline; gap: 2px 10px; padding: 10px 14px; border-radius: 14px; cursor: pointer; }
+.cari-saran li span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; color: var(--redup); }
+.cari-saran li small { font-size: 12px; color: var(--redup); font-weight: 700; white-space: nowrap; }
+.cari-saran li:hover, .cari-saran li.dipilih { background: var(--pink-muda); }
+.kartu-cari { margin-top: 20px; display: flex; flex-direction: column; gap: 18px; padding: 22px; background: var(--putih); border: 1px solid var(--garis); border-radius: 26px; box-shadow: 0 12px 32px rgba(163,36,90,.06); }
+.cari-kepala { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; padding: 14px; border-radius: 20px; background: #FFF5F8; }
+.cari-identitas { flex: 1 1 220px; min-width: 0; }
+.cari-identitas h3 { margin: 4px 0 0; font-family: var(--font-judul); font-weight: 900; font-size: 26px; }
+.cari-identitas p { margin: 0; color: var(--teks-2); font-weight: 600; }
+.cari-identitas .redup-kecil { margin-top: 4px; font-size: 13px; color: var(--redup); }
+.cari-profil { padding: 0 18px; text-decoration: none; }
+.lencana-status { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 800; }
+.status-aktif { background: #E3F4EA; color: #1F6B43; }
+.status-trainee { background: #ECE6FA; color: #5B3FA8; }
+.status-eks { background: #EFE7EB; color: #5A3D52; }
+.grid-ubin { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.ubin { display: flex; flex-direction: column; gap: 4px; padding: 14px; border: 1px solid var(--garis); border-radius: 18px; }
+.juara-ikon.kecil { width: 34px; height: 34px; border-radius: 11px; }
+.ubin-judul { font-size: 13px; font-weight: 800; color: var(--redup); }
+.ubin-angka { font-family: var(--font-angka); font-size: 28px; font-weight: 400; line-height: 1.1; }
+.ubin-angka small { font-family: var(--font-teks); font-size: 13px; color: var(--redup); }
+.ubin-peringkat { font-size: 13px; color: var(--teks-2); }
+.ubin-peringkat b { color: var(--merah); }
+@media (max-width: 860px) { .grid-ubin { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 420px) { .cari-saran li { grid-template-columns: 1fr; } }
+
+/* ---------- Centang "Member all time" (infografis) ---------- */
+.centang-alltime { position: relative; display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 16px 0 12px; border: 1px solid var(--garis); border-radius: 999px; background: var(--putih); font-weight: 800; font-size: 14px; cursor: pointer; user-select: none; }
+.centang-alltime input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.kotak-centang { width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; border: 2px solid #C9B3BF; border-radius: 7px; color: transparent; background: var(--putih); }
+.centang-alltime input:checked + .kotak-centang { background: var(--merah); border-color: var(--merah); color: #fff; }
+.centang-alltime:has(input:checked) { background: var(--pink-muda); border-color: #F2B8CB; }
+.centang-alltime input:focus-visible + .kotak-centang { outline: 3px solid var(--merah); outline-offset: 2px; }
+.centang-alltime:has(input:disabled) { opacity: .55; cursor: wait; }

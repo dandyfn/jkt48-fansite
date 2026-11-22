@@ -22,10 +22,16 @@ router = APIRouter(prefix="/api/lencana", tags=["Lencana"])
 
 
 def _catat_poin_lencana(db: Session, lencana: models.Lencana) -> None:
-    if lencana.jenis == "kapten":
-        catat(db, member_id=lencana.member_id, kode="kapten_baru",
+    # Kapten team dan kapten global punya poin "diangkat" yang berbeda
+    # Poin "diangkat" beda per jabatan: kapten global > wakil kapten global > kapten team
+    kode = {"kapten": "kapten_baru", "kapten_global": "kapten_global_baru",
+            "wakil_kapten_global": "wakap_global_baru"}.get(lencana.jenis)
+    if kode:
+        jabatan = {"kapten": "kapten", "kapten_global": "kapten global",
+                   "wakil_kapten_global": "wakil kapten global"}[lencana.jenis]
+        catat(db, member_id=lencana.member_id, kode=kode,
               tanggal=lencana.tanggal_mulai, sumber_tabel="lencana", sumber_id=lencana.id,
-              keterangan=f"Diangkat kapten {lencana.keterangan or ''}".strip())
+              keterangan=f"Diangkat {jabatan} {lencana.keterangan or ''}".strip())
 
 
 def _cek_tanggal(mulai, selesai) -> None:

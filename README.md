@@ -83,8 +83,8 @@ Proyek ini juga tempatku **belajar membuat API dan machine learning** dari nol, 
 - ➕ **Input aktivitas** dalam 4 tab:
   - **Show**, dengan pemilih lineup dan tombol "pakai lineup show terakhir".
   - **Projek**, dengan tanda center ⭐.
-  - **SSK** (32 peringkat), dengan peringatan kalau ada nama yang dobel.
-  - **Lencana kapten**.
+  - **SSK** (jumlah peringkat & senbatsu bisa diatur), dengan peringatan kalau ada nama yang dobel.
+  - **Lencana kapten** (kapten team atau kapten global).
 - ⚙️ **Pengaturan**: simpan riwayat leaderboard, ubah nilai poin (poin lama dihitung ulang), dan edit profil grup.
 
 </details>
@@ -108,12 +108,15 @@ Proyek ini juga tempatku **belajar membuat API dan machine learning** dari nol, 
 |---|:---:|
 | 🎭 Tampil di satu show teater | **2** |
 | 🎵 Lagu / single / projek grup baru | **10** |
-| ⭐ …dan menjadi center | **+15** |
+| ⭐ …dan menjadi center lagu utama single | **+30** |
+| ⭐ …dan menjadi center lagu lain (B-side, album, digital) | **+15** |
 | 🎬 Film | **20** |
 | 📺 Iklan | **12** |
-| 👑 Diangkat jadi kapten | **25** |
-| 👑 Selama menjabat kapten | **+2** / minggu |
-| 🗳️ SSK peringkat *p* | **(33 − p)**, +10 kalau masuk 1–16 |
+| 👑 Diangkat jadi kapten global (JKT48) | **35** |
+| 🎖️ Diangkat jadi wakil kapten global (JKT48) | **30** |
+| 👑 Diangkat jadi kapten team | **25** |
+| 👑 Selama menjabat kapten (team / global) | **+2** / minggu |
+| 🗳️ SSK peringkat *p* dari *N* peringkat | **(N + 1 − p)**, +10 kalau masuk senbatsu (jumlahnya diisi per SSK, mis. 12 atau 16) |
 
 - **Mingguan** = Senin–Minggu. **Bulanan** = tanggal 1 sampai akhir bulan.
 - **Karier** = saldo awal (total lagu, center, dan show sebelum April 2026) + semua aktivitas yang tercatat.
