@@ -479,3 +479,23 @@ main, .footer { position: relative; z-index: 1; }
 .centang-alltime:has(input:checked) { background: var(--pink-muda); border-color: #F2B8CB; }
 .centang-alltime input:focus-visible + .kotak-centang { outline: 3px solid var(--merah); outline-offset: 2px; }
 .centang-alltime:has(input:disabled) { opacity: .55; cursor: wait; }
+
+/* ---------- Perbandingan antar gen (halaman member) ---------- */
+/* Hanya kelas baru (awalan gb-), tidak mengubah aturan lain. */
+.gen-keterangan { margin: 12px 0 24px; font-size: 15px; }
+#perbandingan-gen { padding-bottom: 8px; }
+.gb-daftar { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.gb-baris { display: grid; grid-template-columns: 52px minmax(0, 1fr) 72px 44px; align-items: center; gap: 10px; font-size: 13px; }
+.gb-gen { font-weight: 800; white-space: nowrap; }
+.gb-jalur { height: 14px; border-radius: 999px; background: #F6EAF0; overflow: hidden; }
+.gb-isi { display: block; height: 100%; border-radius: 999px; background: #E8879F; }
+.gb-nilai { text-align: right; font-weight: 800; white-space: nowrap; }
+.gb-nilai small { font-size: 11px; font-weight: 700; color: var(--redup); }
+.gb-jumlah { text-align: right; font-size: 12px; color: var(--redup); white-space: nowrap; }
+.gb-baris.tertinggi .gb-isi { background: var(--merah); }
+.gb-baris.tertinggi .gb-gen, .gb-baris.tertinggi .gb-nilai { color: var(--merah); }
+.gb-baris.terendah .gb-isi { background: #F4CBD7; }
+@media (max-width: 480px) {
+  .gb-baris { grid-template-columns: 48px minmax(0, 1fr) 64px; gap: 8px; }
+  .gb-jumlah { display: none; }   /* "8 org" disembunyikan di HP supaya tidak berdesakan */
+}
