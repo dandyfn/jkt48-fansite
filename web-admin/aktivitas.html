@@ -31,7 +31,7 @@
     <!-- ===================== SHOW ===================== -->
     <section role="tabpanel" id="tab-show" aria-labelledby="t-show" class="isi-tab">
       <form class="panel" id="form-show" novalidate>
-        <div class="panel-kepala"><h2>Tambah show</h2><span class="redup kecil">Setiap member yang tampil mendapat poin show</span></div>
+        <div class="panel-kepala"><h2 id="judul-form-show">Tambah show</h2><span class="redup kecil">Setiap member yang tampil mendapat poin show</span></div>
         <div class="grid-form tiga">
           <div class="isian"><label for="show-nama">Nama setlist / acara <span class="wajib">*</span></label>
             <input id="show-nama" list="daftar-setlist" required><datalist id="daftar-setlist"></datalist></div>
@@ -42,11 +42,16 @@
           <button type="button" class="tombol-kecil" id="show-lineup-lalu">Pakai lineup show terakhir</button>
         </div>
         <div id="pemilih-show"></div>
-        <div class="kaki-form"><button type="submit" class="tombol tombol-merah">Simpan show</button></div>
+        <div class="kaki-form">
+          <button type="button" class="tombol tombol-garis" id="batal-edit-show" hidden>Batal edit</button>
+          <button type="submit" class="tombol tombol-merah" id="simpan-show">Simpan show</button>
+        </div>
       </form>
 
       <section class="panel">
-        <div class="panel-kepala"><h2>Show terbaru</h2></div>
+        <div class="panel-kepala"><h2>Riwayat show</h2>
+          <input type="search" class="cari-tabel" id="cari-show" placeholder="Cari setlist, tanggal (2019-05) atau member…" aria-label="Cari show"></div>
+        <p class="redup kecil" id="info-tabel-show"></p>
         <div class="bungkus-tabel"><table class="tabel">
           <thead><tr><th>Tanggal</th><th>Setlist</th><th>Member tampil</th><th class="kanan">Aksi</th></tr></thead>
           <tbody id="tabel-show"></tbody>
@@ -57,7 +62,7 @@
     <!-- ===================== PROJEK ===================== -->
     <section role="tabpanel" id="tab-projek" aria-labelledby="t-projek" class="isi-tab" hidden>
       <form class="panel" id="form-projek" novalidate>
-        <div class="panel-kepala"><h2>Tambah projek</h2><span class="redup kecil" id="info-poin-projek"></span></div>
+        <div class="panel-kepala"><h2 id="judul-form-projek">Tambah projek</h2><span class="redup kecil" id="info-poin-projek"></span></div>
         <div class="grid-form tiga">
           <div class="isian"><label for="projek-judul">Judul <span class="wajib">*</span></label><input id="projek-judul" required></div>
           <div class="isian"><label for="projek-kategori">Kategori <span class="wajib">*</span></label>
@@ -70,11 +75,16 @@
           <div class="isian"><label for="projek-cover">Link cover</label><input id="projek-cover" type="url" placeholder="https://…"></div>
         </div>
         <div id="pemilih-projek"></div>
-        <div class="kaki-form"><button type="submit" class="tombol tombol-merah">Simpan projek</button></div>
+        <div class="kaki-form">
+          <button type="button" class="tombol tombol-garis" id="batal-edit-projek" hidden>Batal edit</button>
+          <button type="submit" class="tombol tombol-merah" id="simpan-projek">Simpan projek</button>
+        </div>
       </form>
 
       <section class="panel">
-        <div class="panel-kepala"><h2>Projek terbaru</h2></div>
+        <div class="panel-kepala"><h2>Riwayat projek</h2>
+          <input type="search" class="cari-tabel" id="cari-projek" placeholder="Cari judul, tanggal (2016-05) atau member…" aria-label="Cari projek"></div>
+        <p class="redup kecil" id="info-tabel-projek"></p>
         <div class="bungkus-tabel"><table class="tabel">
           <thead><tr><th>Tanggal</th><th>Judul</th><th>Kategori</th><th>Peserta</th><th class="kanan">Aksi</th></tr></thead>
           <tbody id="tabel-projek"></tbody>

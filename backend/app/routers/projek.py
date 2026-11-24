@@ -3,6 +3,7 @@
 #   GET    /api/projek          -> daftar projek (bisa filter kategori & member_id)
 #   GET    /api/projek/{id}     -> detail projek + peserta
 #   POST   /api/projek          -> tambah projek + otomatis catat poin peserta
+#   PUT    /api/projek/{id}     -> ubah projek (judul, tanggal, peserta, center) + hitung ulang poinnya
 #   DELETE /api/projek/{id}     -> hapus projek + poinnya
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
@@ -39,15 +40,8 @@ def detail_projek(projek_id: int, db: Session = Depends(get_db)):
     return projek
 
 
-@router.post("", response_model=ProjekOut, status_code=status.HTTP_201_CREATED,
-             dependencies=[Depends(admin_saja)])
-def tambah_projek(data: ProjekCreate, db: Session = Depends(get_db)):
-    pastikan_member_ada(db, [p.member_id for p in data.peserta])
-
-    projek = models.Projek(**data.model_dump(exclude={"peserta"}))
-    db.add(projek)
-    db.flush()  # minta database memberi id dulu, karena dipakai di bawah
-
+def _isi_peserta(db: Session, projek: models.Projek, data: ProjekCreate) -> None:
+    """Pasang peserta projek + tulis nota poinnya (dipakai saat tambah dan saat edit)."""
     kode = KATEGORI_KE_KODE[data.kategori]
     for p in data.peserta:
         projek.peserta.append(models.MemberProjek(member_id=p.member_id, is_center=p.is_center))
@@ -58,6 +52,35 @@ def tambah_projek(data: ProjekCreate, db: Session = Depends(get_db)):
             catat(db, member_id=p.member_id, kode=kode_center(data.kategori), tanggal=data.tanggal_rilis,
                   sumber_tabel="projek", sumber_id=projek.id, keterangan=f"Center: {data.judul}")
 
+
+@router.post("", response_model=ProjekOut, status_code=status.HTTP_201_CREATED,
+             dependencies=[Depends(admin_saja)])
+def tambah_projek(data: ProjekCreate, db: Session = Depends(get_db)):
+    pastikan_member_ada(db, [p.member_id for p in data.peserta])
+    projek = models.Projek(**data.model_dump(exclude={"peserta"}))
+    db.add(projek)
+    db.flush()  # minta database memberi id dulu, karena dipakai di _isi_peserta
+    _isi_peserta(db, projek, data)
+    db.commit()
+    db.refresh(projek)
+    return projek
+
+
+@router.put("/{projek_id}", response_model=ProjekOut, dependencies=[Depends(admin_saja)])
+def ubah_projek(projek_id: int, data: ProjekCreate, db: Session = Depends(get_db)):
+    """Ganti seluruh isi projek. Nota poin lama dihapus, lalu ditulis ulang sesuai data baru,
+    jadi leaderboard & infografis langsung ikut benar."""
+    projek = db.get(models.Projek, projek_id)
+    if projek is None:
+        raise HTTPException(404, "Projek tidak ditemukan")
+    pastikan_member_ada(db, [p.member_id for p in data.peserta])
+
+    hapus_dari_sumber(db, "projek", projek_id)          # 1. buang nota poin lama
+    projek.peserta.clear()                              # 2. buang daftar peserta lama
+    db.flush()
+    for kolom, nilai in data.model_dump(exclude={"peserta"}).items():
+        setattr(projek, kolom, nilai)                   # 3. ganti judul, kategori, tanggal, ...
+    _isi_peserta(db, projek, data)                      # 4. pasang peserta baru + nota baru
     db.commit()
     db.refresh(projek)
     return projek

@@ -253,3 +253,15 @@ kbd, code { font-family: ui-monospace, Consolas, monospace; font-size: 12px; pad
   .grid-ssk { grid-template-columns: 1fr 1fr; }
   .pemilih-aksi { margin-left: 0; }
 }
+
+/* ---------- Pemilih: centang member eks ---------- */
+.pemilih-eks { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; font-size: 13px; font-weight: 700; color: var(--redup); cursor: pointer; }
+.pemilih-eks input { width: 18px; height: 18px; accent-color: var(--merah); }
+
+/* ---------- Mode edit (show & projek) ---------- */
+.panel.sedang-edit { border-color: var(--merah); box-shadow: 0 0 0 3px rgba(200,16,46,.12); }
+.label-edit { display: inline-block; margin-left: 8px; padding: 2px 10px; border-radius: 999px; background: #FDE3E3; color: #8E0C22; font-size: 12px; font-weight: 800; font-family: var(--font-teks); vertical-align: middle; }
+.kaki-form { gap: 10px; }
+.cari-tabel { min-height: 38px; padding: 0 14px; border: 1px solid var(--garis); border-radius: 10px; font-family: inherit; font-size: 14px; width: min(320px, 100%); }
+.cari-tabel:focus { outline: none; border-color: var(--merah); box-shadow: 0 0 0 3px rgba(200,16,46,.15); }
+.aksi-baris { display: inline-flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }

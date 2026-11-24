@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Member · JKT48 Fan Board</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Nunito:wght@400;600;700;800&family=Zen+Maru+Gothic:wght@500;700;900&display=swap">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="halaman">
+  <!-- Corak bintang/hati/lingkaran merah, diisi oleh js/dekorasi.js -->
+  <div class="dekorasi" id="dekorasi" aria-hidden="true"></div>
+
+  <header class="navbar">
+    <div class="wadah navbar-isi">
+      <a href="index.html" class="logo">
+        <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C12.8 7 17 11.2 24 12C17 12.8 12.8 17 12 24C11.2 17 7 12.8 0 12C7 11.2 11.2 7 12 0Z" fill="currentColor"/></svg>
+        JKT48 Fan Board
+      </a>
+      <nav aria-label="Navigasi utama" class="menu">
+        <a href="index.html">Leaderboard</a>
+        <a href="infografis.html">Infografis</a>
+        <a href="member.html" aria-current="page">Member</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Muncul kalau API tidak bisa dihubungi -->
+  <div class="banner-error" id="banner-error" hidden>
+    <div class="wadah">
+      <strong>API belum menyala.</strong>
+      Nyalakan backend dulu (uvicorn di folder backend), lalu muat ulang halaman ini.
+    </div>
+  </div>
+
+  <main id="top">
+    <!-- ============ PERBANDINGAN ANTAR GEN ============ -->
+    <!-- Diisi oleh js/member.js (bagian "PERBANDINGAN ANTAR GEN") dari GET /api/infografis -->
+    <section id="perbandingan-gen" class="wadah section" aria-labelledby="judul-gen">
+      <p class="kicker">世代 · PERBANDINGAN ANTAR GEN</p>
+      <div class="judul-baris">
+        <h2 class="judul-besar" id="judul-gen">Perbandingan antar gen</h2>
+        <label class="centang-alltime" title="Ikut sertakan member eks">
+          <input type="checkbox" id="gen-alltime">
+          <span class="kotak-centang" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+          </span>
+          Member all time
+        </label>
+      </div>
+      <p class="teks-redup gen-keterangan" id="gen-keterangan">Memuat…</p>
+      <div class="grid-dua">
+        <article class="kartu-grafik" id="grafik-umur"><p class="memuat">Memuat…</p></article>
+        <article class="kartu-grafik" id="grafik-tinggi"><p class="memuat">Memuat…</p></article>
+      </div>
+    </section>
+
+    <!-- ============ BIODATA MEMBER ============ -->
+    <section id="member" class="wadah section">
+      <p class="kicker">メンバー · BIODATA MEMBER</p>
+      <div class="judul-baris">
+        <h1 class="judul-besar">Kenalan dengan member</h1>
+        <div class="pil-grup tanpa-bingkai" role="group" aria-label="Filter status">
+          <button type="button" class="pil aktif" data-status="">Semua</button>
+          <button type="button" class="pil" data-status="aktif">Aktif</button>
+          <button type="button" class="pil" data-status="trainee">Trainee</button>
+          <button type="button" class="pil" data-status="eks">Eks</button>
+        </div>
+      </div>
+      <div class="baris-cari">
+        <div class="kotak-cari">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+          <label for="cari-member" class="sr-only">Cari member</label>
+          <input type="search" id="cari-member" placeholder="Cari nama member, kota, atau team…" autocomplete="off">
+        </div>
+        <p class="teks-redup kecil" id="info-cari" aria-live="polite" style="margin:0"></p>
+      </div>
+      <div class="grid-member" id="daftar-member"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wadah footer-isi">
+      <span class="logo-footer">JKT48 Fan Board</span>
+      <span>Fansite tidak resmi, dibuat oleh fans untuk fans. Hak cipta foto milik pemiliknya masing-masing.</span>
+    </div>
+  </footer>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/dekorasi.js"></script>
+<script src="js/member.js"></script>
+</body>
+</html>

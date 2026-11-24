@@ -6,6 +6,28 @@ let semuaMember = [];       // semua member (untuk lencana & nama)
 let memberAktif = [];       // aktif + trainee (untuk show, projek, SSK)
 let pemilihShow, pemilihProjek;
 let showTerakhir = null;
+let daftarShow = [], daftarProjek = [];   // seluruh riwayat (untuk tabel + pencarian)
+let editShowId = null, editProjekId = null; // null = mode tambah, angka = sedang mengedit data itu
+const BATAS_TABEL = 30;                   // baris yang ditampilkan di tabel riwayat
+
+// Cocokkan kata kunci dengan judul, tanggal (YYYY-MM-DD) atau nama member yang ikut
+function cocokCari(kata, judul, tgl, peserta) {
+  if (!kata) return true;
+  kata = kata.toLowerCase();
+  return judul.toLowerCase().includes(kata) || tgl.includes(kata) ||
+    peserta.some((p) => p.nama_panggilan.toLowerCase().includes(kata));
+}
+
+// Tampilan form saat mode edit / kembali ke mode tambah
+function aturModeForm(jenis, sedangEdit, judulData) {
+  const form = document.getElementById(`form-${jenis}`);
+  form.classList.toggle("sedang-edit", sedangEdit);
+  document.getElementById(`judul-form-${jenis}`).innerHTML = sedangEdit
+    ? `Edit ${jenis} <span class="label-edit">${esc(judulData)}</span>` : `Tambah ${jenis}`;
+  document.getElementById(`simpan-${jenis}`).textContent = sedangEdit ? "Simpan perubahan" : `Simpan ${jenis}`;
+  document.getElementById(`batal-edit-${jenis}`).hidden = !sedangEdit;
+  if (sedangEdit) form.scrollIntoView({ behavior: "smooth", block: "start" });
+}
 
 const LABEL_KATEGORI = { single: "Single", lagu: "Lagu", projek_grup: "Projek grup", film: "Film", iklan: "Iklan" };
 const KATEGORI_JKT = ["single", "lagu", "projek_grup"];
@@ -64,19 +86,48 @@ async function jalankan(tombol, aksi) {
 // SHOW
 // =====================================================================
 async function muatShow() {
-  const daftar = await panggil("/api/show").catch(() => []);
-  showTerakhir = daftar[0] || null;
+  daftarShow = await panggil("/api/show").catch(() => []);
+  showTerakhir = daftarShow[0] || null;
   document.getElementById("daftar-setlist").innerHTML =
-    [...new Set(daftar.map((s) => s.nama))].map((n) => `<option value="${esc(n)}">`).join("");
-  document.getElementById("tabel-show").innerHTML = daftar.slice(0, 20).map((s) => `
+    [...new Set(daftarShow.map((s) => s.nama))].map((n) => `<option value="${esc(n)}">`).join("");
+  gambarTabelShow();
+}
+
+function gambarTabelShow() {
+  const kata = document.getElementById("cari-show").value.trim();
+  const cocok = daftarShow.filter((s) => cocokCari(kata, s.nama, s.tanggal, s.peserta));
+  document.getElementById("info-tabel-show").textContent = kata
+    ? `${cocok.length} show cocok${cocok.length > BATAS_TABEL ? `, ditampilkan ${BATAS_TABEL} terbaru` : ""}`
+    : `${daftarShow.length} show tersimpan. Ditampilkan ${Math.min(BATAS_TABEL, daftarShow.length)} terbaru; pakai kotak cari untuk show lama.`;
+  document.getElementById("tabel-show").innerHTML = cocok.slice(0, BATAS_TABEL).map((s) => `
     <tr>
       <td>${tanggal(s.tanggal)}</td>
       <td><strong>${esc(s.nama)}</strong><br><small class="redup">${esc(s.lokasi || "")}</small></td>
       <td><span class="chip">${s.peserta.length} member</span>
         <small class="redup">${esc(s.peserta.map((p) => p.nama_panggilan).join(", "))}</small></td>
-      <td class="kanan"><button type="button" class="tombol-kecil bahaya" data-hapus-show="${s.id}">Hapus</button></td>
-    </tr>`).join("") || `<tr><td colspan="4" class="redup">Belum ada show.</td></tr>`;
+      <td class="kanan"><span class="aksi-baris">
+        <button type="button" class="tombol-kecil" data-edit-show="${s.id}">Edit</button>
+        <button type="button" class="tombol-kecil bahaya" data-hapus-show="${s.id}">Hapus</button></span></td>
+    </tr>`).join("") || `<tr><td colspan="4" class="redup">${kata ? "Tidak ada show yang cocok." : "Belum ada show."}</td></tr>`;
 }
+document.getElementById("cari-show").addEventListener("input", gambarTabelShow);
+
+function mulaiEditShow(id) {
+  const s = daftarShow.find((x) => x.id === id);
+  if (!s) return;
+  editShowId = id;
+  document.getElementById("show-nama").value = s.nama;
+  document.getElementById("show-tanggal").value = s.tanggal;
+  document.getElementById("show-lokasi").value = s.lokasi || "";
+  pemilihShow.isi(s.peserta.map((p) => ({ member_id: p.member_id, is_center: false })));
+  aturModeForm("show", true, `${s.nama} · ${tanggal(s.tanggal)}`);
+}
+function selesaiEditShow() {
+  editShowId = null;
+  pemilihShow.kosongkan();
+  aturModeForm("show", false);
+}
+document.getElementById("batal-edit-show").addEventListener("click", selesaiEditShow);
 
 document.getElementById("show-lineup-lalu").addEventListener("click", () => {
   if (!showTerakhir) return beriTahu("Belum ada show sebelumnya.", "gagal");
@@ -98,19 +149,28 @@ document.getElementById("form-show").addEventListener("submit", (e) => {
   if (data.member_ids.length === 0) return beriTahu("Pilih minimal satu member yang tampil.", "gagal");
 
   jalankan(e.submitter, async () => {
-    await panggil("/api/show", { method: "POST", body: data });
-    beriTahu(`Show disimpan · ${data.member_ids.length} member mendapat poin show`);
-    pemilihShow.kosongkan();   // nama & tanggal dibiarkan, memudahkan input show berikutnya
+    if (editShowId) {
+      await panggil(`/api/show/${editShowId}`, { method: "PUT", body: data });
+      beriTahu(`Show diperbarui · poin ${data.member_ids.length} member dihitung ulang`);
+      selesaiEditShow();
+    } else {
+      await panggil("/api/show", { method: "POST", body: data });
+      beriTahu(`Show disimpan · ${data.member_ids.length} member mendapat poin show`);
+      pemilihShow.kosongkan();   // nama & tanggal dibiarkan, memudahkan input show berikutnya
+    }
     await muatShow();
   });
 });
 
 document.getElementById("tabel-show").addEventListener("click", async (e) => {
+  const edit = e.target.closest("[data-edit-show]");
+  if (edit) return mulaiEditShow(Number(edit.dataset.editShow));
   const t = e.target.closest("[data-hapus-show]");
   if (!t || !confirm("Hapus show ini? Poin show semua member yang tampil ikut terhapus.")) return;
   try {
     await panggil(`/api/show/${t.dataset.hapusShow}`, { method: "DELETE" });
     beriTahu("Show dihapus");
+    if (editShowId === Number(t.dataset.hapusShow)) selesaiEditShow();
     await muatShow();
   } catch (err) { beriTahu(err.message, "gagal"); }
 });
@@ -131,11 +191,20 @@ function aturKategori() {
 pilihKategori.addEventListener("change", aturKategori);
 
 async function muatProjek() {
-  const daftar = await panggil("/api/projek").catch(() => []);
+  daftarProjek = await panggil("/api/projek").catch(() => []);
   document.getElementById("ssk-projek").innerHTML = `<option value="">–</option>` +
-    daftar.filter((p) => KATEGORI_JKT.includes(p.kategori))
+    daftarProjek.filter((p) => KATEGORI_JKT.includes(p.kategori))
       .map((p) => `<option value="${p.id}">${esc(p.judul)} (${tanggal(p.tanggal_rilis)})</option>`).join("");
-  document.getElementById("tabel-projek").innerHTML = daftar.slice(0, 20).map((p) => {
+  gambarTabelProjek();
+}
+
+function gambarTabelProjek() {
+  const kata = document.getElementById("cari-projek").value.trim();
+  const cocok = daftarProjek.filter((p) => cocokCari(kata, p.judul, p.tanggal_rilis, p.peserta));
+  document.getElementById("info-tabel-projek").textContent = kata
+    ? `${cocok.length} projek cocok${cocok.length > BATAS_TABEL ? `, ditampilkan ${BATAS_TABEL} terbaru` : ""}`
+    : `${daftarProjek.length} projek tersimpan. Ditampilkan ${Math.min(BATAS_TABEL, daftarProjek.length)} terbaru; pakai kotak cari untuk projek lama.`;
+  document.getElementById("tabel-projek").innerHTML = cocok.slice(0, BATAS_TABEL).map((p) => {
     const center = p.peserta.filter((x) => x.is_center).map((x) => x.nama_panggilan);
     return `
       <tr>
@@ -143,10 +212,36 @@ async function muatProjek() {
         <td><strong>${esc(p.judul)}</strong></td>
         <td><span class="chip">${esc(LABEL_KATEGORI[p.kategori] || p.kategori)}</span></td>
         <td>${p.peserta.length} member${center.length ? `<br><small class="redup">Center: ${esc(center.join(", "))}</small>` : ""}</td>
-        <td class="kanan"><button type="button" class="tombol-kecil bahaya" data-hapus-projek="${p.id}">Hapus</button></td>
+        <td class="kanan"><span class="aksi-baris">
+          <button type="button" class="tombol-kecil" data-edit-projek="${p.id}">Edit</button>
+          <button type="button" class="tombol-kecil bahaya" data-hapus-projek="${p.id}">Hapus</button></span></td>
       </tr>`;
-  }).join("") || `<tr><td colspan="5" class="redup">Belum ada projek.</td></tr>`;
+  }).join("") || `<tr><td colspan="5" class="redup">${kata ? "Tidak ada projek yang cocok." : "Belum ada projek."}</td></tr>`;
 }
+document.getElementById("cari-projek").addEventListener("input", gambarTabelProjek);
+
+function mulaiEditProjek(id) {
+  const p = daftarProjek.find((x) => x.id === id);
+  if (!p) return;
+  editProjekId = id;
+  document.getElementById("projek-judul").value = p.judul;
+  pilihKategori.value = p.kategori;
+  document.getElementById("projek-tanggal").value = p.tanggal_rilis;
+  document.getElementById("projek-deskripsi").value = p.deskripsi || "";
+  document.getElementById("projek-cover").value = p.cover_url || "";
+  aturKategori();                                   // mode center mengikuti kategori
+  pemilihProjek.isi(p.peserta.map((x) => ({ member_id: x.member_id, is_center: x.is_center })));
+  aturModeForm("projek", true, `${p.judul} · ${tanggal(p.tanggal_rilis)}`);
+}
+function selesaiEditProjek() {
+  editProjekId = null;
+  document.getElementById("form-projek").reset();
+  document.getElementById("projek-tanggal").value = hariIni();
+  pemilihProjek.kosongkan();
+  aturKategori();
+  aturModeForm("projek", false);
+}
+document.getElementById("batal-edit-projek").addEventListener("click", selesaiEditProjek);
 
 document.getElementById("form-projek").addEventListener("submit", (e) => {
   e.preventDefault();
@@ -162,22 +257,27 @@ document.getElementById("form-projek").addEventListener("submit", (e) => {
   if (data.peserta.length === 0 && !confirm("Belum ada member yang dipilih. Tetap simpan projek tanpa peserta?")) return;
 
   jalankan(e.submitter, async () => {
-    await panggil("/api/projek", { method: "POST", body: data });
-    beriTahu(`Projek "${data.judul}" disimpan`);
-    e.target.reset();
-    document.getElementById("projek-tanggal").value = hariIni();
-    pemilihProjek.kosongkan();
-    aturKategori();
+    if (editProjekId) {
+      await panggil(`/api/projek/${editProjekId}`, { method: "PUT", body: data });
+      beriTahu(`Projek "${data.judul}" diperbarui · poin pesertanya dihitung ulang`);
+    } else {
+      await panggil("/api/projek", { method: "POST", body: data });
+      beriTahu(`Projek "${data.judul}" disimpan`);
+    }
+    selesaiEditProjek();
     await muatProjek();
   });
 });
 
 document.getElementById("tabel-projek").addEventListener("click", async (e) => {
+  const edit = e.target.closest("[data-edit-projek]");
+  if (edit) return mulaiEditProjek(Number(edit.dataset.editProjek));
   const t = e.target.closest("[data-hapus-projek]");
   if (!t || !confirm("Hapus projek ini? Poin semua pesertanya ikut terhapus.")) return;
   try {
     await panggil(`/api/projek/${t.dataset.hapusProjek}`, { method: "DELETE" });
     beriTahu("Projek dihapus");
+    if (editProjekId === Number(t.dataset.hapusProjek)) selesaiEditProjek();
     await muatProjek();
   } catch (err) { beriTahu(err.message, "gagal"); }
 });
@@ -341,8 +441,9 @@ document.getElementById("tabel-lencana").addEventListener("click", async (e) => 
   }
   memberAktif = semuaMember.filter((m) => m.status !== "eks");
 
-  pemilihShow = buatPemilih(document.getElementById("pemilih-show"), memberAktif);
-  pemilihProjek = buatPemilih(document.getElementById("pemilih-projek"), memberAktif, { denganCenter: true });
+  // Semua member dikirim ke pemilih; member eks disembunyikan sampai dicentang / sedang diedit
+  pemilihShow = buatPemilih(document.getElementById("pemilih-show"), semuaMember);
+  pemilihProjek = buatPemilih(document.getElementById("pemilih-projek"), semuaMember, { denganCenter: true });
   aturKategori();
   buatBarisSsk();
   document.getElementById("lencana-member").innerHTML = `<option value="">Pilih member…</option>` +
