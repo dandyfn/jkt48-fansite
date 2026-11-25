@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Model AI · Admin JKT48 Fan Board</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Nunito:wght@400;600;700;800&family=Zen+Maru+Gothic:wght@500;700;900&display=swap">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body data-halaman="ml">
+<div class="tata-letak">
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <main class="konten">
+    <header class="kepala-halaman">
+      <div>
+        <p class="sapaan" id="sapaan">Halo</p>
+        <h1>Model AI</h1>
+      </div>
+      <a href="../web-user/prediksi.html" target="_blank" rel="noopener" class="tombol tombol-garis">Lihat halaman Prediksi AI</a>
+    </header>
+
+    <!-- ===================== STATUS + TOMBOL LATIH ULANG ===================== -->
+    <section class="panel" aria-labelledby="judul-status">
+      <div class="panel-kepala">
+        <h2 id="judul-status">Status model</h2>
+        <span class="redup kecil" id="waktu-latih">Memuat…</span>
+      </div>
+      <p class="ml-status" id="ml-status" hidden></p>
+      <p class="redup kecil" style="margin:0">
+        Model <strong>tidak</strong> otomatis belajar ulang saat data berubah. Setelah kamu menambah atau mengedit
+        show, projek, SSK, atau member, tekan <strong>Latih ulang model</strong> supaya prediksi memakai data terbaru.
+        Prosesnya hanya beberapa detik.
+      </p>
+      <div class="baris-tombol-kiri">
+        <button type="button" class="tombol tombol-merah" id="tombol-latih">Latih ulang model</button>
+      </div>
+      <section class="grid-ringkas" id="ml-ringkas" aria-label="Data yang dipakai model"></section>
+    </section>
+
+    <!-- ===================== HASIL UJI TIAP MODEL ===================== -->
+    <div class="ml-tiga">
+      <section class="panel" aria-labelledby="judul-m1">
+        <div class="panel-kepala"><h2 id="judul-m1">1 · Prediksi senbatsu</h2><span class="chip">Logistic Regression</span></div>
+        <div id="ml-senbatsu" class="redup">Memuat…</div>
+      </section>
+      <section class="panel" aria-labelledby="judul-m2">
+        <div class="panel-kepala"><h2 id="judul-m2">2 · Prediksi SSK</h2><span class="chip">Ridge Regression</span></div>
+        <div id="ml-ssk" class="redup">Memuat…</div>
+      </section>
+      <section class="panel" aria-labelledby="judul-m3">
+        <div class="panel-kepala"><h2 id="judul-m3">3 · Kelompok member</h2><span class="chip">K-Means</span></div>
+        <div id="ml-kelompok" class="redup">Memuat…</div>
+      </section>
+    </div>
+
+    <!-- ===================== PENGARUH FITUR ===================== -->
+    <div class="dua-kolom">
+      <section class="panel">
+        <div class="panel-kepala"><h2>Apa yang paling berpengaruh? (senbatsu)</h2></div>
+        <p class="redup kecil" style="margin:0">Batang merah = menaikkan peluang, abu-abu = menurunkan. Makin panjang, makin besar pengaruhnya.
+          Kadang ada angka minus yang terasa aneh (misal "total show"): itu karena dua fitur mirip, seperti total show dan lama di JKT48, "berbagi" pengaruh yang sama.</p>
+        <ol class="ml-bobot" id="bobot-senbatsu"></ol>
+      </section>
+      <section class="panel">
+        <div class="panel-kepala"><h2>Apa yang paling berpengaruh? (SSK)</h2></div>
+        <p class="redup kecil" style="margin:0">Dibaca sama seperti di samping.</p>
+        <ol class="ml-bobot" id="bobot-ssk"></ol>
+      </section>
+    </div>
+  </main>
+</div>
+
+<script src="js/api-admin.js"></script>
+<script src="js/layout.js"></script>
+<script src="js/ml.js"></script>
+</body>
+</html>

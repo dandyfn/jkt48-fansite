@@ -1,0 +1,7 @@
+Folder ini berisi hasil latihan model machine learning (model_jkt48.joblib).
+
+- File .joblib dibuat otomatis oleh backend (app/ml.py), jadi TIDAK perlu di-push ke GitHub
+  (sudah diabaikan lewat .gitignore).
+- Kalau file ini hilang (misal server hosting di-reset), model otomatis dilatih ulang
+  saat halaman Prediksi pertama kali dibuka.
+- Untuk melatih ulang secara manual: web admin -> menu "Model AI" -> tombol "Latih ulang model".

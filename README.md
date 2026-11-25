@@ -72,6 +72,7 @@ Proyek ini juga tempatku **belajar membuat API dan machine learning** dari nol, 
 | **Infografis** `infografis.html` | 6 kartu juara: show, senbatsu, lagu, tinggi, umur (tertua/termuda), dan projek. Setiap kartu punya tombol **Lihat semua** untuk peringkat lengkap. Ada diagram lingkaran lagu, center, dan senbatsu, per generasi atau per member. |
 | **Member** `member.html` | Kartu biodata lengkap dengan filter Aktif / Trainee / Eks dan kotak pencarian. Foto kapten diberi bingkai emas 👑. |
 | **Detail** `detail.html` | Hero member, ubin statistik, rincian poin minggu ini, grafik peringkat 8 minggu, dan daftar projek. |
+| **Prediksi AI** `prediksi.html` | 🤖 Tebakan machine learning: peluang masuk **senbatsu** single berikutnya, urutan **SSK** berikutnya, **kelompok member** menurut pola karier, dan pencarian **member yang kariernya mirip**. |
 
 </details>
 
@@ -85,6 +86,8 @@ Proyek ini juga tempatku **belajar membuat API dan machine learning** dari nol, 
   - **Projek**, dengan tanda center ⭐.
   - **SSK** (jumlah peringkat & senbatsu bisa diatur), dengan peringatan kalau ada nama yang dobel.
   - **Lencana kapten** (kapten team atau kapten global).
+- ✏️ **Edit show & projek** langsung dari tabel riwayat (poin otomatis disesuaikan).
+- 🤖 **Model AI**: lihat hasil uji tiap model, fitur yang paling berpengaruh, dan tombol **Latih ulang model** setelah data diubah.
 - ⚙️ **Pengaturan**: simpan riwayat leaderboard, ubah nilai poin (poin lama dihitung ulang), dan edit profil grup.
 
 </details>
@@ -220,6 +223,20 @@ Buka **http://127.0.0.1:8000/docs** untuk melihat Swagger. ✅
 
 ---
 
+## 🤖 Machine learning
+
+Semua kode ML ada di `backend/app/ml.py`. Ada 3 model:
+
+| Model | Jenis | Belajar dari | Hasilnya |
+|---|---|---|---|
+| **Prediksi senbatsu** | Klasifikasi · Logistic Regression | Keadaan tiap member sebelum setiap single (show, lagu, senbatsu & center sebelumnya, SSK), lalu siapa yang akhirnya masuk lineup | Peluang (%) tiap member masuk senbatsu single berikutnya |
+| **Prediksi SSK** | Regresi · Ridge Regression | Keadaan member sebelum setiap SSK, lalu peringkat aslinya | Tebakan urutan SSK berikutnya |
+| **Kelompok member** | Clustering · K-Means | Angka karier semua member (tanpa kunci jawaban) | Kelompok member yang polanya mirip + 5 member paling mirip |
+
+**Kalau data diubah atau ditambah (juga setelah hosting):** edit/tambah lewat web admin seperti biasa → buka menu **Model AI** → tekan **Latih ulang model** (beberapa detik). Halaman Model AI memberi tahu otomatis kalau data sudah berubah sejak model terakhir dilatih. Hasil latihan disimpan di `backend/ml/model_jkt48.joblib` (tidak di-push ke GitHub); kalau file itu hilang, model otomatis dilatih ulang saat halaman Prediksi AI dibuka.
+
+---
+
 ## 🔌 Daftar API
 
 <details>
@@ -241,6 +258,9 @@ Buka **http://127.0.0.1:8000/docs** untuk melihat Swagger. ✅
 | `GET` | `/api/aktivitas?member_id=` | Riwayat poin seorang member | |
 | `GET` `PUT` | `/api/aturan-poin` | Nilai poin | PUT ✅ |
 | `GET` `PUT` | `/api/grup` | Profil & statistik grup | PUT ✅ |
+| `GET` | `/api/ml/senbatsu` · `/api/ml/ssk` · `/api/ml/kelompok` · `/api/ml/mirip/{id}` | Hasil 3 model machine learning | |
+| `GET` | `/api/ml/status` | Kapan model dilatih + apakah data sudah berubah | |
+| `POST` | `/api/ml/latih` | Latih ulang semua model | ✅ |
 
 ✅ = wajib membawa token admin (`Authorization: Bearer …`)
 
@@ -255,9 +275,9 @@ Buka **http://127.0.0.1:8000/docs** untuk melihat Swagger. ✅
 - [x] Web admin: input show, projek, SSK, lencana
 - [x] Import data asli dari Excel
 - [x] Halaman infografis & halaman member terpisah
-- [ ] Mengisi data show & projek mulai April 2026
-- [ ] Data senbatsu
-- [ ] 🤖 **Machine learning**: deteksi data janggal, pengelompokan member, prediksi peringkat
+- [x] Data show 2012–2026, projek, dan senbatsu/SSK
+- [x] Edit show & projek dari web admin
+- [x] 🤖 **Machine learning**: prediksi senbatsu, prediksi SSK, pengelompokan member + member mirip
 - [ ] Pertumbuhan follower Instagram & TikTok (fitur sudah ada, sedang dimatikan)
 - [ ] Deploy supaya bisa dibuka siapa saja 🌐
 

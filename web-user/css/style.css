@@ -499,3 +499,97 @@ main, .footer { position: relative; z-index: 1; }
   .gb-baris { grid-template-columns: 48px minmax(0, 1fr) 64px; gap: 8px; }
   .gb-jumlah { display: none; }   /* "8 org" disembunyikan di HP supaya tidak berdesakan */
 }
+
+/* ---------- Halaman Prediksi AI (prediksi.html) ---------- */
+/* Semua kelas berawalan pr- supaya tidak mengganggu halaman lain. */
+.pr-atas { margin-bottom: 8px; }
+.pr-status { margin: 16px 0 0; display: inline-block; padding: 8px 16px; border-radius: 999px; background: var(--pink-muda); font-size: 14px; color: var(--teks-2); }
+.pr-blok { padding-top: 56px; }
+.pr-judul { margin-bottom: 8px; }
+.pr-keterangan { margin: 0 0 24px; color: var(--redup); max-width: 760px; }
+.pr-subjudul { margin: 32px 0 12px; font-family: var(--font-judul); font-weight: 900; font-size: 20px; }
+
+/* Kartu senbatsu */
+.pr-grid-kartu { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+.pr-kartu { display: grid; grid-template-columns: 28px 64px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 14px; height: 100%; box-sizing: border-box;
+  text-decoration: none; color: var(--tinta); background: var(--putih); border: 1px solid var(--garis); border-radius: 22px; transition: transform .2s; }
+.pr-kartu:hover { transform: translateY(-2px); color: var(--tinta); }
+.pr-kartu .foto, .pr-ssk .foto, .pr-mirip .foto, .pr-mirip-asal .foto { width: 64px; height: 80px; border-radius: 14px; }
+.pr-kartu .foto .inisial, .pr-ssk .foto .inisial, .pr-mirip .foto .inisial, .pr-mirip-asal .foto .inisial { font-size: 28px; }
+.pr-nomor { font-family: var(--font-angka); font-size: 24px; color: var(--redup); text-align: center; }
+.pr-isi { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; min-width: 0; }
+.pr-nama { font-family: var(--font-judul); font-weight: 900; font-size: 19px; line-height: 1.1; }
+.pr-persen { font-family: var(--font-angka); font-size: 28px; line-height: 1; color: var(--merah); white-space: nowrap; }
+.pr-persen small { font-size: 16px; }
+.pr-bar { display: block; width: 100%; height: 8px; border-radius: 999px; background: #F6EAF0; overflow: hidden; }
+.pr-bar > span { display: block; height: 100%; border-radius: 999px; background: var(--merah); }
+.pr-alasan { list-style: none; margin: 0; padding: 0; font-size: 12px; color: var(--redup); line-height: 1.35; }
+.pr-alasan strong { color: var(--teks-2); }
+
+/* Daftar kecil (hampir masuk, SSK) */
+.pr-daftar-kecil { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+.pr-daftar-kecil a { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border: 1px solid var(--garis); border-radius: 16px; text-decoration: none; color: var(--tinta); }
+.pr-daftar-kecil a:hover { background: var(--pink-muda); color: var(--tinta); }
+.pr-nomor-kecil { width: 28px; flex-shrink: 0; text-align: center; font-family: var(--font-angka); font-size: 20px; color: var(--redup); }
+.pr-nama-kecil { flex: 1; min-width: 0; font-weight: 800; }
+.pr-persen-kecil { font-family: var(--font-angka); font-size: 20px; color: var(--merah); white-space: nowrap; display: flex; flex-direction: column; align-items: flex-end; line-height: 1.1; }
+.pr-persen-kecil small { font-family: var(--font-teks); font-size: 11px; font-weight: 700; color: var(--redup); }
+
+.pr-ssk { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 8px 16px; }
+.pr-ssk a { display: grid; grid-template-columns: 28px 44px 110px minmax(0, 1fr) 48px; align-items: center; gap: 10px; padding: 8px 12px; border: 1px solid var(--garis); border-radius: 16px; text-decoration: none; color: var(--tinta); background: var(--putih); }
+.pr-ssk a:hover { background: var(--pink-muda); color: var(--tinta); }
+.pr-ssk .foto { width: 44px; height: 54px; border-radius: 10px; }
+.pr-ssk .foto .inisial { font-size: 20px; }
+.pr-ssk-senbatsu a { border-color: #F2B8C6; }
+.pr-bar-ssk > span { background: #E8879F; }
+.pr-ssk-senbatsu .pr-bar-ssk > span { background: var(--merah); }
+.pr-garis-senbatsu { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; margin: 8px 0; font-size: 13px; font-weight: 800; color: var(--merah); letter-spacing: .08em; text-transform: uppercase; }
+.pr-garis-senbatsu::before, .pr-garis-senbatsu::after { content: ""; flex: 1; border-top: 2px dashed #F2B8C6; }
+
+/* Uji akurasi */
+.pr-uji { margin-top: 20px; padding: 14px 18px; border-radius: 18px; background: var(--pink-muda); color: var(--teks-2); font-size: 15px; }
+.pr-uji summary { cursor: pointer; font-weight: 800; color: var(--tinta); }
+.pr-uji summary span { color: var(--merah); }
+.pr-uji p { margin: 10px 0 6px; }
+.pr-uji ul { margin: 0; padding-left: 20px; }
+
+/* Kelompok */
+.pr-centang { margin-bottom: 16px; }
+.pr-kelompok { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+.pr-kelompok-kartu { display: flex; flex-direction: column; gap: 12px; padding: 20px; border: 1px solid var(--garis); border-radius: 24px; background: var(--putih); }
+.pr-kelompok-kepala { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.pr-kelompok-kepala h3 { margin: 0; font-family: var(--font-judul); font-weight: 900; font-size: 20px; }
+.pr-jumlah { font-size: 13px; font-weight: 700; color: var(--redup); }
+.pr-kelompok-kartu .chip-baris { align-items: center; font-size: 13px; color: var(--redup); margin: 0; }
+.pr-rata { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 0; }
+.pr-rata div { padding: 8px; border-radius: 12px; background: var(--pink-muda); text-align: center; }
+.pr-rata dt { font-size: 11px; font-weight: 700; color: var(--redup); }
+.pr-rata dd { margin: 0; font-family: var(--font-angka); font-size: 20px; }
+.pr-anggota { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; max-height: 168px; overflow-y: auto; }
+.pr-anggota a { display: inline-block; padding: 4px 10px; border-radius: 999px; background: #F5EFF6; font-size: 13px; font-weight: 800; color: var(--teks-2); text-decoration: none; }
+.pr-anggota a:hover { background: var(--pink-muda); color: var(--merah); }
+.pr-anggota a.eks { background: transparent; border: 1px dashed var(--garis); color: var(--redup); font-weight: 700; }
+.pr-anggota .redup { font-size: 13px; color: var(--redup); }
+
+/* Member mirip */
+.pr-pilih { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+.pr-pilih input { flex: 1 1 260px; max-width: 420px; min-height: 48px; padding: 0 18px; border: 1px solid var(--garis); border-radius: 999px; font-family: var(--font-teks); font-size: 16px; color: var(--tinta); }
+.pr-pilih input:focus-visible { outline: 3px solid var(--merah); outline-offset: 2px; }
+.pr-mirip-asal { display: flex; align-items: center; gap: 14px; padding: 14px; margin-bottom: 12px; border-radius: 22px; background: var(--tinta); color: #fff; }
+.pr-mirip-asal p { margin: 4px 0 0; font-size: 14px; color: #E9DDEB; }
+.pr-mirip-asal strong { font-family: var(--font-judul); font-size: 19px; }
+.pr-mirip-asal p strong { font-family: var(--font-teks); font-size: 14px; }
+.pr-mirip { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 10px; }
+.pr-mirip a { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--garis); border-radius: 20px; text-decoration: none; color: var(--tinta); }
+.pr-mirip a:hover { background: var(--pink-muda); color: var(--tinta); }
+.pr-sub { font-size: 12px; color: var(--redup); }
+
+@media (max-width: 480px) {
+  .pr-grid-kartu, .pr-ssk, .pr-mirip, .pr-kelompok { grid-template-columns: minmax(0, 1fr); }
+  .pr-kartu { grid-template-columns: 22px 52px minmax(0, 1fr) auto; gap: 10px; }
+  .pr-kartu .foto { width: 52px; height: 66px; }
+  .pr-ssk a { grid-template-columns: 26px 40px minmax(0, 1fr) 44px; }
+  .pr-ssk .pr-bar-ssk { display: none; }
+  .pr-ssk .foto { width: 40px; height: 50px; }
+  .pr-rata { grid-template-columns: repeat(2, 1fr); }
+}

@@ -13,7 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .config import settings
 from .penjadwal import hentikan_penjadwal, mulai_penjadwal
 from .routers import (aktivitas, aturan_poin, auth, grup, infografis, leaderboard, lencana,
-                      members, projek, show, sosmed, ssk)
+                      members, ml, projek, show, sosmed, ssk)
 
 
 @asynccontextmanager
@@ -56,6 +56,7 @@ if settings.fitur_follower:
     app.include_router(sosmed.router)
 app.include_router(grup.router)
 app.include_router(infografis.router)
+app.include_router(ml.router)
 
 
 @app.get("/", tags=["Umum"])

@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prediksi AI · JKT48 Fan Board</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Nunito:wght@400;600;700;800&family=Zen+Maru+Gothic:wght@500;700;900&display=swap">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="halaman">
+  <div class="dekorasi" id="dekorasi" aria-hidden="true"></div>
+
+  <header class="navbar">
+    <div class="wadah navbar-isi">
+      <a href="index.html" class="logo">
+        <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C12.8 7 17 11.2 24 12C17 12.8 12.8 17 12 24C11.2 17 7 12.8 0 12C7 11.2 11.2 7 12 0Z" fill="currentColor"/></svg>
+        JKT48 Fan Board
+      </a>
+      <nav aria-label="Navigasi utama" class="menu">
+        <a href="index.html">Leaderboard</a>
+        <a href="infografis.html">Infografis</a>
+        <a href="member.html">Member</a>
+        <a href="prediksi.html" aria-current="page">Prediksi AI</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="banner-error" id="banner-error" hidden>
+    <div class="wadah">
+      <strong>API belum menyala.</strong>
+      Nyalakan backend dulu (uvicorn di folder backend), lalu muat ulang halaman ini.
+    </div>
+  </div>
+
+  <main class="wadah section">
+    <!-- ============ JUDUL ============ -->
+    <section class="pr-atas">
+      <p class="kicker">予測 · PREDIKSI AI</p>
+      <h1 class="judul-besar">Kalau AI ikut menebak…</h1>
+      <p class="teks-redup">
+        Model machine learning ini belajar dari ribuan show, ratusan lagu, dan hasil SSK sejak 2012,
+        lalu menebak siapa yang berpeluang masuk senbatsu dan SSK berikutnya. Ini tebakan dari pola data lama,
+        <strong>bukan bocoran</strong>. Anggap saja untuk seru-seruan.
+      </p>
+      <p class="pr-status" id="pr-status">Memuat model…</p>
+    </section>
+
+    <!-- ============ 1. PREDIKSI SENBATSU ============ -->
+    <section class="pr-blok" aria-labelledby="judul-senbatsu">
+      <p class="kicker">選抜 · MODEL 1</p>
+      <h2 class="judul-section pr-judul" id="judul-senbatsu">Siapa masuk senbatsu single berikutnya?</h2>
+      <p class="pr-keterangan" id="senbatsu-keterangan"></p>
+      <ol class="pr-grid-kartu" id="senbatsu-masuk"><li class="memuat">Memuat…</li></ol>
+      <h3 class="pr-subjudul">Hampir masuk</h3>
+      <ol class="pr-daftar-kecil" id="senbatsu-hampir"></ol>
+      <details class="pr-uji">
+        <summary>Seberapa jago tebakannya? <span id="senbatsu-akurasi"></span></summary>
+        <p>Model diuji secara jujur: 5 single terakhir <strong>disembunyikan</strong> dulu, model belajar dari single sebelumnya,
+          lalu tebakannya dicocokkan dengan lineup asli.</p>
+        <ul id="senbatsu-uji"></ul>
+      </details>
+    </section>
+
+    <!-- ============ 2. PREDIKSI SSK ============ -->
+    <section class="pr-blok" aria-labelledby="judul-ssk">
+      <p class="kicker">総選挙 · MODEL 2</p>
+      <h2 class="judul-section pr-judul" id="judul-ssk">Prediksi urutan SSK berikutnya</h2>
+      <p class="pr-keterangan" id="ssk-keterangan"></p>
+      <ol class="pr-ssk" id="ssk-daftar"><li class="memuat">Memuat…</li></ol>
+      <details class="pr-uji">
+        <summary>Seberapa jago tebakannya? <span id="ssk-akurasi"></span></summary>
+        <p id="ssk-uji"></p>
+      </details>
+    </section>
+
+    <!-- ============ 3. KELOMPOK MEMBER ============ -->
+    <section class="pr-blok" aria-labelledby="judul-kelompok">
+      <p class="kicker">分類 · MODEL 3</p>
+      <h2 class="judul-section pr-judul" id="judul-kelompok">Kelompok member menurut pola karier</h2>
+      <p class="pr-keterangan">
+        Di sini AI <strong>tidak diberi kunci jawaban</strong>. Ia hanya melihat angka tiap member (show per bulan, lagu per tahun,
+        persentase senbatsu, center, SSK, lama berkarier), lalu mengelompokkan member yang angkanya berdekatan.
+        Nama kelompok diambil dari ciri yang paling menonjol.
+      </p>
+      <label class="centang-alltime pr-centang">
+        <input type="checkbox" id="kelompok-eks">
+        <span class="kotak-centang" aria-hidden="true">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+        </span>
+        Tampilkan member eks
+      </label>
+      <div class="pr-kelompok" id="kelompok-daftar"><p class="memuat">Memuat…</p></div>
+    </section>
+
+    <!-- ============ 4. MEMBER MIRIP ============ -->
+    <section class="pr-blok" aria-labelledby="judul-mirip">
+      <p class="kicker">似ている · MEMBER MIRIP</p>
+      <h2 class="judul-section pr-judul" id="judul-mirip">Siapa yang kariernya paling mirip?</h2>
+      <p class="pr-keterangan">Pilih satu member (termasuk eks). AI mencari 5 member yang angka kariernya paling dekat.</p>
+      <div class="pr-pilih">
+        <label for="mirip-input" class="sr-only">Nama member</label>
+        <input id="mirip-input" list="mirip-saran" placeholder="Ketik nama, contoh: Freya" autocomplete="off">
+        <datalist id="mirip-saran"></datalist>
+        <button type="button" class="tombol-utama" id="mirip-tombol">Cari yang mirip</button>
+      </div>
+      <div id="mirip-hasil" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wadah footer-isi">
+      <span class="logo-footer">JKT48 Fan Board</span>
+      <span>Fansite tidak resmi, dibuat oleh fans untuk fans. Hak cipta foto milik pemiliknya masing-masing.</span>
+    </div>
+  </footer>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/dekorasi.js"></script>
+<script src="js/prediksi.js"></script>
+</body>
+</html>

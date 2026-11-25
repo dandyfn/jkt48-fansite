@@ -265,3 +265,22 @@ kbd, code { font-family: ui-monospace, Consolas, monospace; font-size: 12px; pad
 .cari-tabel { min-height: 38px; padding: 0 14px; border: 1px solid var(--garis); border-radius: 10px; font-family: inherit; font-size: 14px; width: min(320px, 100%); }
 .cari-tabel:focus { outline: none; border-color: var(--merah); box-shadow: 0 0 0 3px rgba(200,16,46,.15); }
 .aksi-baris { display: inline-flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+
+/* ---------- Halaman Model AI (ml.html) ---------- */
+.ml-status { margin: 0; padding: 12px 14px; border-radius: 12px; }
+.ml-status.aman { background: #E8F5EE; color: #1F6B43; }
+.ml-status.perlu { background: #FFF4E5; color: #8A4B00; }
+.ml-tiga { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.ml-angka-besar { margin: 0; font-family: var(--font-angka); font-size: 40px; line-height: 1.1; color: var(--merah); display: flex; flex-direction: column; }
+.ml-angka-besar small { font-family: var(--font-teks); font-size: 13px; font-weight: 700; color: var(--redup); }
+#ml-senbatsu p, #ml-ssk p, #ml-kelompok p { margin: 0 0 8px; }
+.ml-uji { margin: 0; padding-left: 18px; color: var(--tinta); font-size: 14px; }
+.ml-bobot { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.ml-bobot li { display: grid; grid-template-columns: minmax(0, 190px) minmax(0, 1fr) 52px; align-items: center; gap: 10px; font-size: 13px; }
+.ml-bobot-label { font-weight: 700; }
+.ml-bobot-jalur { height: 10px; border-radius: 999px; background: #F5EFF6; overflow: hidden; }
+.ml-bobot-jalur span { display: block; height: 100%; border-radius: 999px; }
+.ml-bobot-jalur .naik { background: var(--merah); }
+.ml-bobot-jalur .turun { background: #B9AABD; }
+.ml-bobot-angka { text-align: right; font-weight: 800; font-variant-numeric: tabular-nums; }
+@media (max-width: 1100px) { .ml-tiga { grid-template-columns: minmax(0, 1fr); } }

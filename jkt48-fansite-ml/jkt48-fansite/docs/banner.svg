@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="360" viewBox="0 0 1280 360" role="img" aria-label="JKT48 Fan Board: fansite leaderboard, infografis, dan biodata member">
+  <defs>
+    <pattern id="titik" width="26" height="26" patternUnits="userSpaceOnUse">
+      <circle cx="13" cy="13" r="1.6" fill="#D7192F" opacity="0.18"/>
+    </pattern>
+    <linearGradient id="pudar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity="0"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="1"/>
+    </linearGradient>
+    <path id="bintang" d="M12 0C12.8 7 17 11.2 24 12C17 12.8 12.8 17 12 24C11.2 17 7 12.8 0 12C7 11.2 11.2 7 12 0Z"/>
+    <path id="hati" d="M12 21s-7.5-4.6-9.6-9.3C.9 8.2 3 4.5 6.6 4.5c2.1 0 3.6 1.2 5.4 3.2 1.8-2 3.3-3.2 5.4-3.2 3.6 0 5.7 3.7 4.2 7.2C19.5 16.4 12 21 12 21z"/>
+    <style>
+      @keyframes kedip { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .25; transform: scale(.6); } }
+      .k { transform-box: fill-box; transform-origin: center; animation: kedip 2.4s ease-in-out infinite; }
+      .k2 { animation-delay: .8s; } .k3 { animation-delay: 1.6s; }
+      @media (prefers-reduced-motion: reduce) { .k { animation: none; } }
+    </style>
+  </defs>
+
+  <rect width="1280" height="360" rx="32" fill="#FFFFFF"/>
+  <rect width="1280" height="360" rx="32" fill="url(#titik)"/>
+  <rect y="160" width="1280" height="200" fill="url(#pudar)"/>
+  <rect x="1" y="1" width="1278" height="358" rx="31" fill="none" stroke="#F0D6E2" stroke-width="2"/>
+
+  <!-- lingkaran tipis -->
+  <circle cx="1170" cy="70" r="130" fill="none" stroke="#D7192F" stroke-width="2" opacity="0.10"/>
+  <circle cx="90" cy="320" r="110" fill="none" stroke="#D7192F" stroke-width="2" opacity="0.10"/>
+  <circle cx="1060" cy="300" r="34" fill="none" stroke="#D7192F" stroke-width="1.5" opacity="0.2"/>
+
+  <!-- bintang & hati berkedip -->
+  <g fill="#D7192F">
+    <g transform="translate(80 52) scale(1.5)"><use href="#bintang" class="k"/></g>
+    <g transform="translate(1080 52) scale(1.1)" opacity=".85"><use href="#bintang" class="k k2"/></g>
+    <g transform="translate(1196 230) scale(.8)" opacity=".8"><use href="#bintang" class="k k3"/></g>
+    <g transform="translate(560 40) scale(.6)" opacity=".6"><use href="#bintang" class="k k2"/></g>
+    <g transform="translate(36 190) scale(.7)" opacity=".7"><use href="#bintang" class="k k3"/></g>
+    <g transform="translate(980 150) scale(.55)" opacity=".55"><use href="#bintang" class="k"/></g>
+    <g transform="translate(770 70) scale(.9)" opacity=".7"><use href="#hati" class="k k2"/></g>
+    <g transform="translate(1236 300) scale(.8)" opacity=".5"><use href="#hati" class="k k3"/></g>
+    <g transform="translate(1220 140) scale(.7)" opacity=".55"><use href="#hati" class="k"/></g>
+    <circle cx="700" cy="70" r="4" opacity=".4" class="k k3"/>
+    <circle cx="1130" cy="190" r="5" opacity=".5" class="k"/>
+    <circle cx="250" cy="70" r="3.5" opacity=".4" class="k k2"/>
+  </g>
+
+  <!-- logo + judul -->
+  <g transform="translate(150 96)">
+    <use href="#bintang" transform="scale(2.6)" fill="#C8102E"/>
+  </g>
+  <text x="150" y="190" font-family="'Zen Maru Gothic','Hiragino Maru Gothic ProN','Yu Gothic','Segoe UI',sans-serif" font-weight="700" font-size="20" letter-spacing="4" fill="#C8102E">ファンボード · FANSITE BUATAN FANS</text>
+  <text x="150" y="250" font-family="'Zen Maru Gothic','Trebuchet MS','Segoe UI',Arial,sans-serif" font-weight="900" font-size="66" fill="#2B1B33">JKT48 Fan Board</text>
+  <text x="152" y="292" font-family="'Nunito','Segoe UI',Arial,sans-serif" font-weight="600" font-size="22" fill="#6E5A73">Leaderboard progres member · infografis · biodata lengkap</text>
+
+  <!-- kartu podium mini -->
+  <g font-family="'Nunito','Segoe UI',Arial,sans-serif" font-weight="800">
+    <g transform="translate(860 120)">
+      <rect width="110" height="150" rx="20" fill="#fff" stroke="#F0D6E2" stroke-width="2"/>
+      <rect x="10" y="10" width="90" height="96" rx="14" fill="#EEE8FB"/>
+      <circle cx="28" cy="28" r="14" fill="#E9E7EE" stroke="#fff" stroke-width="3"/>
+      <text x="28" y="34" font-size="16" text-anchor="middle" fill="#3F3A4A" font-family="Georgia,serif">2</text>
+      <rect x="14" y="118" width="54" height="9" rx="4.5" fill="#2B1B33" opacity=".85"/>
+      <rect x="14" y="132" width="34" height="7" rx="3.5" fill="#C8102E" opacity=".7"/>
+    </g>
+    <g transform="translate(985 92)">
+      <rect width="120" height="178" rx="22" fill="#fff" stroke="#F0D6E2" stroke-width="2"/>
+      <rect x="10" y="10" width="100" height="118" rx="16" fill="#FBE3EC"/>
+      <circle cx="30" cy="30" r="16" fill="#F6E7B8" stroke="#fff" stroke-width="3"/>
+      <text x="30" y="37" font-size="18" text-anchor="middle" fill="#5C4300" font-family="Georgia,serif">1</text>
+      <path d="M68 24h30l-3 -14-8 7-4-10-4 10-8-7z" fill="#C8102E" opacity=".9"/>
+      <rect x="14" y="142" width="62" height="10" rx="5" fill="#2B1B33" opacity=".85"/>
+      <rect x="14" y="158" width="40" height="8" rx="4" fill="#C8102E"/>
+    </g>
+    <g transform="translate(1120 140)">
+      <rect width="104" height="130" rx="18" fill="#fff" stroke="#F0D6E2" stroke-width="2"/>
+      <rect x="10" y="10" width="84" height="80" rx="13" fill="#FFEFE3"/>
+      <circle cx="26" cy="26" r="13" fill="#F7DFCF" stroke="#fff" stroke-width="3"/>
+      <text x="26" y="32" font-size="15" text-anchor="middle" fill="#6E3510" font-family="Georgia,serif">3</text>
+      <rect x="14" y="100" width="50" height="8" rx="4" fill="#2B1B33" opacity=".85"/>
+      <rect x="14" y="113" width="30" height="7" rx="3.5" fill="#C8102E" opacity=".6"/>
+    </g>
+  </g>
+</svg>
