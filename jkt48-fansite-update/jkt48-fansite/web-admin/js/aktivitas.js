@@ -1,0 +1,545 @@
+// aktivitas.js
+// Halaman Input Aktivitas: 4 tab (Show, Projek, SSK, Lencana).
+// Setiap data yang disimpan otomatis menghasilkan poin di backend (lihat poin.py).
+
+let semuaMember = [];       // semua member (untuk lencana & nama)
+let memberAktif = [];       // aktif + trainee (untuk show, projek, SSK)
+let pemilihShow, pemilihProjek;
+let showTerakhir = null;
+let daftarShow = [], daftarProjek = [];   // seluruh riwayat (untuk tabel + pencarian)
+let editShowId = null, editProjekId = null; // null = mode tambah, angka = sedang mengedit data itu
+let daftarSsk = [], daftarLencana = [];
+let editSskId = null, editLencanaId = null;
+const BATAS_TABEL = 30;                   // baris yang ditampilkan di tabel riwayat
+
+// Cocokkan kata kunci dengan judul, tanggal (YYYY-MM-DD) atau nama member yang ikut
+function cocokCari(kata, judul, tgl, peserta) {
+  if (!kata) return true;
+  kata = kata.toLowerCase();
+  return judul.toLowerCase().includes(kata) || tgl.includes(kata) ||
+    peserta.some((p) => p.nama_panggilan.toLowerCase().includes(kata));
+}
+
+// Tampilan form saat mode edit / kembali ke mode tambah
+const TEKS_FORM = {   // judul form & tombol simpan saat mode tambah
+  show: { judul: "Tambah show", edit: "Edit show", simpan: "Simpan show" },
+  projek: { judul: "Tambah projek", edit: "Edit projek", simpan: "Simpan projek" },
+  ssk: { judul: "Input hasil SSK", edit: "Edit SSK", simpan: "Simpan hasil SSK" },
+  lencana: { judul: "Tambah lencana", edit: "Edit lencana", simpan: "Simpan lencana" },
+};
+function aturModeForm(jenis, sedangEdit, judulData) {
+  const form = document.getElementById(`form-${jenis}`);
+  const teks = TEKS_FORM[jenis];
+  form.classList.toggle("sedang-edit", sedangEdit);
+  document.getElementById(`judul-form-${jenis}`).innerHTML = sedangEdit
+    ? `${teks.edit} <span class="label-edit">${esc(judulData)}</span>` : teks.judul;
+  document.getElementById(`simpan-${jenis}`).textContent = sedangEdit ? "Simpan perubahan" : teks.simpan;
+  document.getElementById(`batal-edit-${jenis}`).hidden = !sedangEdit;
+  if (sedangEdit) form.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+const LABEL_KATEGORI = { single: "Single", lagu: "Lagu", projek_grup: "Projek grup", film: "Film", iklan: "Iklan" };
+const KATEGORI_JKT = ["single", "lagu", "projek_grup"];
+
+// =====================================================================
+// TAB
+// =====================================================================
+const tabs = document.querySelectorAll('[role="tab"]');
+function bukaTab(tab) {
+  tabs.forEach((t) => {
+    const pilih = t === tab;
+    t.classList.toggle("aktif", pilih);
+    t.setAttribute("aria-selected", pilih);
+    t.tabIndex = pilih ? 0 : -1;
+    document.getElementById(t.getAttribute("aria-controls")).hidden = !pilih;
+  });
+  history.replaceState(null, "", "#" + tab.id.slice(2));   // ingat tab di alamat (#show, #ssk, ...)
+}
+tabs.forEach((t, i) => {
+  t.addEventListener("click", () => bukaTab(t));
+  t.addEventListener("keydown", (e) => {                      // panah kiri/kanan pindah tab
+    if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+    const n = tabs[(i + (e.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length];
+    bukaTab(n);
+    n.focus();
+  });
+});
+function bukaTabDariAlamat() {
+  const tab = document.getElementById("t-" + location.hash.slice(1));
+  if (tab) bukaTab(tab);
+}
+bukaTabDariAlamat();
+window.addEventListener("hashchange", bukaTabDariAlamat);
+
+function namaMember(id) {
+  const m = semuaMember.find((x) => x.id === id);
+  return m ? m.nama_panggilan : `#${id}`;
+}
+
+async function jalankan(tombol, aksi) {
+  // Matikan tombol selama menunggu API, supaya tidak tersimpan dua kali
+  const teks = tombol.textContent;
+  tombol.disabled = true;
+  tombol.textContent = "Menyimpan…";
+  try {
+    await aksi();
+  } catch (err) {
+    beriTahu(err.message, "gagal");
+  } finally {
+    tombol.disabled = false;
+    tombol.textContent = teks;
+  }
+}
+
+// =====================================================================
+// SHOW
+// =====================================================================
+async function muatShow() {
+  daftarShow = await panggil("/api/show").catch(() => []);
+  showTerakhir = daftarShow[0] || null;
+  document.getElementById("daftar-setlist").innerHTML =
+    [...new Set(daftarShow.map((s) => s.nama))].map((n) => `<option value="${esc(n)}">`).join("");
+  gambarTabelShow();
+}
+
+function gambarTabelShow() {
+  const kata = document.getElementById("cari-show").value.trim();
+  const cocok = daftarShow.filter((s) => cocokCari(kata, s.nama, s.tanggal, s.peserta));
+  document.getElementById("info-tabel-show").textContent = kata
+    ? `${cocok.length} show cocok${cocok.length > BATAS_TABEL ? `, ditampilkan ${BATAS_TABEL} terbaru` : ""}`
+    : `${daftarShow.length} show tersimpan. Ditampilkan ${Math.min(BATAS_TABEL, daftarShow.length)} terbaru; pakai kotak cari untuk show lama.`;
+  document.getElementById("tabel-show").innerHTML = cocok.slice(0, BATAS_TABEL).map((s) => `
+    <tr>
+      <td>${tanggal(s.tanggal)}</td>
+      <td><strong>${esc(s.nama)}</strong><br><small class="redup">${esc(s.lokasi || "")}</small></td>
+      <td><span class="chip">${s.peserta.length} member</span>
+        <small class="redup">${esc(s.peserta.map((p) => p.nama_panggilan).join(", "))}</small></td>
+      <td class="kanan"><span class="aksi-baris">
+        <button type="button" class="tombol-kecil" data-edit-show="${s.id}">Edit</button>
+        <button type="button" class="tombol-kecil bahaya" data-hapus-show="${s.id}">Hapus</button></span></td>
+    </tr>`).join("") || `<tr><td colspan="4" class="redup">${kata ? "Tidak ada show yang cocok." : "Belum ada show."}</td></tr>`;
+}
+document.getElementById("cari-show").addEventListener("input", gambarTabelShow);
+
+function mulaiEditShow(id) {
+  const s = daftarShow.find((x) => x.id === id);
+  if (!s) return;
+  editShowId = id;
+  document.getElementById("show-nama").value = s.nama;
+  document.getElementById("show-tanggal").value = s.tanggal;
+  document.getElementById("show-lokasi").value = s.lokasi || "";
+  pemilihShow.isi(s.peserta.map((p) => ({ member_id: p.member_id, is_center: false })));
+  aturModeForm("show", true, `${s.nama} · ${tanggal(s.tanggal)}`);
+}
+function selesaiEditShow() {
+  editShowId = null;
+  pemilihShow.kosongkan();
+  aturModeForm("show", false);
+}
+document.getElementById("batal-edit-show").addEventListener("click", selesaiEditShow);
+
+document.getElementById("show-lineup-lalu").addEventListener("click", () => {
+  if (!showTerakhir) return beriTahu("Belum ada show sebelumnya.", "gagal");
+  pemilihShow.kosongkan();
+  pemilihShow.pilih(showTerakhir.peserta.map((p) => p.member_id));
+  if (!document.getElementById("show-nama").value) document.getElementById("show-nama").value = showTerakhir.nama;
+  beriTahu(`Lineup "${showTerakhir.nama}" (${tanggal(showTerakhir.tanggal)}) dipilih`);
+});
+
+document.getElementById("form-show").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const data = {
+    nama: document.getElementById("show-nama").value.trim(),
+    tanggal: document.getElementById("show-tanggal").value,
+    lokasi: document.getElementById("show-lokasi").value.trim() || null,
+    member_ids: pemilihShow.ambilTerpilih().map((p) => p.member_id),
+  };
+  if (!data.nama || !data.tanggal) return beriTahu("Nama setlist dan tanggal wajib diisi.", "gagal");
+  if (data.member_ids.length === 0) return beriTahu("Pilih minimal satu member yang tampil.", "gagal");
+
+  jalankan(e.submitter, async () => {
+    if (editShowId) {
+      await panggil(`/api/show/${editShowId}`, { method: "PUT", body: data });
+      beriTahu(`Show diperbarui · poin ${data.member_ids.length} member dihitung ulang`);
+      selesaiEditShow();
+    } else {
+      await panggil("/api/show", { method: "POST", body: data });
+      beriTahu(`Show disimpan · ${data.member_ids.length} member mendapat poin show`);
+      pemilihShow.kosongkan();   // nama & tanggal dibiarkan, memudahkan input show berikutnya
+    }
+    await muatShow();
+  });
+});
+
+document.getElementById("tabel-show").addEventListener("click", async (e) => {
+  const edit = e.target.closest("[data-edit-show]");
+  if (edit) return mulaiEditShow(Number(edit.dataset.editShow));
+  const t = e.target.closest("[data-hapus-show]");
+  if (!t || !confirm("Hapus show ini? Poin show semua member yang tampil ikut terhapus.")) return;
+  try {
+    await panggil(`/api/show/${t.dataset.hapusShow}`, { method: "DELETE" });
+    beriTahu("Show dihapus");
+    if (editShowId === Number(t.dataset.hapusShow)) selesaiEditShow();
+    await muatShow();
+  } catch (err) { beriTahu(err.message, "gagal"); }
+});
+
+// =====================================================================
+// PROJEK
+// =====================================================================
+const pilihKategori = document.getElementById("projek-kategori");
+function aturKategori() {
+  const jkt = KATEGORI_JKT.includes(pilihKategori.value);
+  pemilihProjek.aturModeCenter(jkt);
+  document.getElementById("info-poin-projek").textContent = jkt
+    ? (pilihKategori.value === "single"
+        ? "Peserta +10 poin, center single +30 poin tambahan"
+        : "Peserta +10 poin, center +15 poin tambahan")
+    : `Peserta +${pilihKategori.value === "film" ? 20 : 12} poin (projek luar)`;
+}
+pilihKategori.addEventListener("change", aturKategori);
+
+async function muatProjek() {
+  daftarProjek = await panggil("/api/projek").catch(() => []);
+  document.getElementById("ssk-projek").innerHTML = `<option value="">–</option>` +
+    daftarProjek.filter((p) => KATEGORI_JKT.includes(p.kategori))
+      .map((p) => `<option value="${p.id}">${esc(p.judul)} (${tanggal(p.tanggal_rilis)})</option>`).join("");
+  gambarTabelProjek();
+}
+
+function gambarTabelProjek() {
+  const kata = document.getElementById("cari-projek").value.trim();
+  const cocok = daftarProjek.filter((p) => cocokCari(kata, p.judul, p.tanggal_rilis, p.peserta));
+  document.getElementById("info-tabel-projek").textContent = kata
+    ? `${cocok.length} projek cocok${cocok.length > BATAS_TABEL ? `, ditampilkan ${BATAS_TABEL} terbaru` : ""}`
+    : `${daftarProjek.length} projek tersimpan. Ditampilkan ${Math.min(BATAS_TABEL, daftarProjek.length)} terbaru; pakai kotak cari untuk projek lama.`;
+  document.getElementById("tabel-projek").innerHTML = cocok.slice(0, BATAS_TABEL).map((p) => {
+    const center = p.peserta.filter((x) => x.is_center).map((x) => x.nama_panggilan);
+    return `
+      <tr>
+        <td>${tanggal(p.tanggal_rilis)}</td>
+        <td><strong>${esc(p.judul)}</strong></td>
+        <td><span class="chip">${esc(LABEL_KATEGORI[p.kategori] || p.kategori)}</span></td>
+        <td>${p.peserta.length} member${center.length ? `<br><small class="redup">Center: ${esc(center.join(", "))}</small>` : ""}</td>
+        <td class="kanan"><span class="aksi-baris">
+          <button type="button" class="tombol-kecil" data-edit-projek="${p.id}">Edit</button>
+          <button type="button" class="tombol-kecil bahaya" data-hapus-projek="${p.id}">Hapus</button></span></td>
+      </tr>`;
+  }).join("") || `<tr><td colspan="5" class="redup">${kata ? "Tidak ada projek yang cocok." : "Belum ada projek."}</td></tr>`;
+}
+document.getElementById("cari-projek").addEventListener("input", gambarTabelProjek);
+
+function mulaiEditProjek(id) {
+  const p = daftarProjek.find((x) => x.id === id);
+  if (!p) return;
+  editProjekId = id;
+  document.getElementById("projek-judul").value = p.judul;
+  pilihKategori.value = p.kategori;
+  document.getElementById("projek-tanggal").value = p.tanggal_rilis;
+  document.getElementById("projek-deskripsi").value = p.deskripsi || "";
+  document.getElementById("projek-cover").value = p.cover_url || "";
+  aturKategori();                                   // mode center mengikuti kategori
+  pemilihProjek.isi(p.peserta.map((x) => ({ member_id: x.member_id, is_center: x.is_center })));
+  aturModeForm("projek", true, `${p.judul} · ${tanggal(p.tanggal_rilis)}`);
+}
+function selesaiEditProjek() {
+  editProjekId = null;
+  document.getElementById("form-projek").reset();
+  document.getElementById("projek-tanggal").value = hariIni();
+  pemilihProjek.kosongkan();
+  aturKategori();
+  aturModeForm("projek", false);
+}
+document.getElementById("batal-edit-projek").addEventListener("click", selesaiEditProjek);
+
+document.getElementById("form-projek").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const data = {
+    judul: document.getElementById("projek-judul").value.trim(),
+    kategori: pilihKategori.value,
+    tanggal_rilis: document.getElementById("projek-tanggal").value,
+    deskripsi: document.getElementById("projek-deskripsi").value.trim() || null,
+    cover_url: document.getElementById("projek-cover").value.trim() || null,
+    peserta: pemilihProjek.ambilTerpilih(),
+  };
+  if (!data.judul || !data.tanggal_rilis) return beriTahu("Judul dan tanggal rilis wajib diisi.", "gagal");
+  if (data.peserta.length === 0 && !confirm("Belum ada member yang dipilih. Tetap simpan projek tanpa peserta?")) return;
+
+  jalankan(e.submitter, async () => {
+    if (editProjekId) {
+      await panggil(`/api/projek/${editProjekId}`, { method: "PUT", body: data });
+      beriTahu(`Projek "${data.judul}" diperbarui · poin pesertanya dihitung ulang`);
+    } else {
+      await panggil("/api/projek", { method: "POST", body: data });
+      beriTahu(`Projek "${data.judul}" disimpan`);
+    }
+    selesaiEditProjek();
+    await muatProjek();
+  });
+});
+
+document.getElementById("tabel-projek").addEventListener("click", async (e) => {
+  const edit = e.target.closest("[data-edit-projek]");
+  if (edit) return mulaiEditProjek(Number(edit.dataset.editProjek));
+  const t = e.target.closest("[data-hapus-projek]");
+  if (!t || !confirm("Hapus projek ini? Poin semua pesertanya ikut terhapus.")) return;
+  try {
+    await panggil(`/api/projek/${t.dataset.hapusProjek}`, { method: "DELETE" });
+    beriTahu("Projek dihapus");
+    if (editProjekId === Number(t.dataset.hapusProjek)) selesaiEditProjek();
+    await muatProjek();
+  } catch (err) { beriTahu(err.message, "gagal"); }
+});
+
+// =====================================================================
+// SSK
+// =====================================================================
+// Jumlah peringkat & senbatsu bisa beda tiap SSK (mis. 32 & 16, atau 24 & 12)
+function angkaSsk() {
+  const batas = (id, cadangan) => Math.min(64, Math.max(1, Number(document.getElementById(id).value) || cadangan));
+  const jumlah = batas("ssk-jumlah", 32);
+  return { jumlah, senbatsu: Math.min(batas("ssk-senbatsu", 16), jumlah) };
+}
+function poinSsk(n, { jumlah, senbatsu }) { return jumlah + 1 - n + (n <= senbatsu ? 10 : 0); }
+
+function buatBarisSsk() {
+  const angka = angkaSsk();
+  const lama = {};                       // simpan pilihan yang sudah diisi supaya tidak hilang
+  document.querySelectorAll("[data-peringkat]").forEach((s) => { if (s.value) lama[s.dataset.peringkat] = s.value; });
+  // Member aktif & trainee di atas; member eks di bawah (dibutuhkan saat mengedit SSK lama)
+  const eks = semuaMember.filter((m) => m.status === "eks");
+  const opsi = `<option value="">–</option>` +
+    `<optgroup label="Aktif & trainee">` +
+    memberAktif.map((m) => `<option value="${m.id}">${esc(m.nama_panggilan)} (${esc(m.team || "Trainee")})</option>`).join("") +
+    `</optgroup><optgroup label="Member eks">` +
+    eks.map((m) => `<option value="${m.id}">${esc(m.nama_panggilan)} (eks, Gen ${m.generasi})</option>`).join("") +
+    `</optgroup>`;
+  let html = "";
+  for (let n = 1; n <= angka.jumlah; n++) {
+    if (n === 1) html += `<p class="judul-blok-ssk">Senbatsu (1–${angka.senbatsu})</p>`;
+    if (n === angka.senbatsu + 1) html += `<p class="judul-blok-ssk">Di luar senbatsu (${n}–${angka.jumlah})</p>`;
+    html += `
+      <div class="baris-ssk${n <= angka.senbatsu ? " utama" : ""}">
+        <label for="ssk-${n}" class="no-ssk">${n}</label>
+        <select id="ssk-${n}" data-peringkat="${n}">${opsi}</select>
+        <span class="poin-ssk">+${poinSsk(n, angka)}</span>
+      </div>`;
+  }
+  document.getElementById("baris-ssk").innerHTML = html;
+  Object.entries(lama).forEach(([n, v]) => { const s = document.getElementById(`ssk-${n}`); if (s) s.value = v; });
+}
+["ssk-jumlah", "ssk-senbatsu"].forEach((id) => document.getElementById(id).addEventListener("input", buatBarisSsk));
+
+// Tandai merah kalau satu member dipilih di dua peringkat
+document.getElementById("baris-ssk").addEventListener("change", () => {
+  const semua = [...document.querySelectorAll("[data-peringkat]")];
+  const hitung = {};
+  semua.forEach((s) => s.value && (hitung[s.value] = (hitung[s.value] || 0) + 1));
+  semua.forEach((s) => s.classList.toggle("dobel", !!s.value && hitung[s.value] > 1));
+});
+
+async function muatSsk() {
+  daftarSsk = await panggil("/api/ssk").catch(() => []);
+  document.getElementById("tabel-ssk").innerHTML = daftarSsk.map((s) => `
+    <tr>
+      <td>${tanggal(s.tanggal_pengumuman)}</td>
+      <td><strong>${esc(s.judul)}</strong></td>
+      <td>${s.hasil.slice(0, 3).map((h) => `${h.peringkat}. ${esc(h.nama_panggilan)}`).join("<br>")}</td>
+      <td>${s.hasil.length} member<br><small class="redup">Senbatsu ${s.jumlah_senbatsu ?? 16} dari ${s.jumlah_peringkat ?? 32}</small></td>
+      <td class="kanan"><div class="aksi-baris">
+        <button type="button" class="tombol-kecil" data-edit-ssk="${s.id}">Edit</button>
+        <button type="button" class="tombol-kecil bahaya" data-hapus-ssk="${s.id}">Hapus</button>
+      </div></td>
+    </tr>`).join("") || `<tr><td colspan="5" class="redup">Belum ada SSK.</td></tr>`;
+}
+
+// Isi form dengan data SSK yang mau diedit
+function mulaiEditSsk(id) {
+  const s = daftarSsk.find((x) => x.id === id);
+  if (!s) return;
+  editSskId = id;
+  document.getElementById("ssk-judul").value = s.judul;
+  document.getElementById("ssk-tanggal").value = s.tanggal_pengumuman;
+  document.getElementById("ssk-projek").value = s.projek_id ?? "";
+  document.getElementById("ssk-jumlah").value = s.jumlah_peringkat ?? 32;
+  document.getElementById("ssk-senbatsu").value = s.jumlah_senbatsu ?? 16;
+  document.querySelectorAll("[data-peringkat]").forEach((x) => (x.value = ""));
+  buatBarisSsk();
+  s.hasil.forEach((h) => {
+    const pilih = document.getElementById(`ssk-${h.peringkat}`);
+    if (pilih) pilih.value = h.member_id;
+  });
+  document.getElementById("baris-ssk").dispatchEvent(new Event("change"));   // cek dobel
+  aturModeForm("ssk", true, `${s.judul} · ${tanggal(s.tanggal_pengumuman)}`);
+}
+function selesaiEditSsk() {
+  editSskId = null;
+  document.getElementById("form-ssk").reset();
+  document.getElementById("ssk-tanggal").value = hariIni();
+  document.querySelectorAll("[data-peringkat]").forEach((x) => (x.value = ""));
+  buatBarisSsk();
+  aturModeForm("ssk", false);
+}
+document.getElementById("batal-edit-ssk").addEventListener("click", selesaiEditSsk);
+
+document.getElementById("form-ssk").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const hasil = [...document.querySelectorAll("[data-peringkat]")]
+    .filter((s) => s.value)
+    .map((s) => ({ member_id: Number(s.value), peringkat: Number(s.dataset.peringkat) }));
+  const data = {
+    judul: document.getElementById("ssk-judul").value.trim(),
+    tanggal_pengumuman: document.getElementById("ssk-tanggal").value,
+    projek_id: Number(document.getElementById("ssk-projek").value) || null,
+    jumlah_peringkat: angkaSsk().jumlah,
+    jumlah_senbatsu: angkaSsk().senbatsu,
+    hasil,
+  };
+  if (!data.judul || !data.tanggal_pengumuman) return beriTahu("Judul dan tanggal pengumuman wajib diisi.", "gagal");
+  if (hasil.length === 0) return beriTahu("Isi minimal satu peringkat.", "gagal");
+  if (document.querySelector(".dobel")) return beriTahu("Ada member yang dipilih di lebih dari satu peringkat (ditandai merah).", "gagal");
+
+  jalankan(e.submitter, async () => {
+    if (editSskId) {
+      await panggil(`/api/ssk/${editSskId}`, { method: "PUT", body: data });
+      beriTahu(`SSK "${data.judul}" diperbarui · poin ${hasil.length} member dihitung ulang`);
+    } else {
+      await panggil("/api/ssk", { method: "POST", body: data });
+      beriTahu(`Hasil SSK "${data.judul}" disimpan · ${hasil.length} member mendapat poin`);
+    }
+    selesaiEditSsk();
+    await muatSsk();
+  });
+});
+
+document.getElementById("tabel-ssk").addEventListener("click", async (e) => {
+  const edit = e.target.closest("[data-edit-ssk]");
+  if (edit) return mulaiEditSsk(Number(edit.dataset.editSsk));
+  const t = e.target.closest("[data-hapus-ssk]");
+  if (!t || !confirm("Hapus hasil SSK ini? Poin SSK semua member ikut terhapus.")) return;
+  try {
+    await panggil(`/api/ssk/${t.dataset.hapusSsk}`, { method: "DELETE" });
+    if (editSskId === Number(t.dataset.hapusSsk)) selesaiEditSsk();
+    beriTahu("Hasil SSK dihapus");
+    await muatSsk();
+  } catch (err) { beriTahu(err.message, "gagal"); }
+});
+
+// =====================================================================
+// LENCANA
+// =====================================================================
+const LABEL_LENCANA = { kapten: "Kapten", kapten_global: "Kapten global", wakil_kapten_global: "Wakil kapten global", wakil_kapten: "Wakil kapten team", lainnya: "Lainnya" };
+
+async function muatLencana() {
+  daftarLencana = await panggil("/api/lencana").catch(() => []);
+  document.getElementById("tabel-lencana").innerHTML = daftarLencana.map((l) => `
+    <tr>
+      <td><strong>${esc(l.nama_panggilan)}</strong></td>
+      <td>${esc(LABEL_LENCANA[l.jenis] || l.jenis)} ${esc(l.keterangan || "")}</td>
+      <td>${tanggal(l.tanggal_mulai)} – ${l.tanggal_selesai ? tanggal(l.tanggal_selesai) : "sekarang"}</td>
+      <td>${l.masih_menjabat ? '<span class="chip status-aktif">Menjabat</span>' : '<span class="chip status-eks">Selesai</span>'}</td>
+      <td class="kanan"><div class="aksi">
+        <button type="button" class="tombol-kecil" data-edit-lencana="${l.id}">Edit</button>
+        ${l.masih_menjabat ? `<button type="button" class="tombol-kecil" data-akhiri="${l.id}">Akhiri hari ini</button>` : ""}
+        <button type="button" class="tombol-kecil bahaya" data-hapus-lencana="${l.id}">Hapus</button>
+      </div></td>
+    </tr>`).join("") || `<tr><td colspan="5" class="redup">Belum ada lencana.</td></tr>`;
+}
+
+function mulaiEditLencana(id) {
+  const l = daftarLencana.find((x) => x.id === id);
+  if (!l) return;
+  editLencanaId = id;
+  document.getElementById("lencana-member").value = l.member_id;
+  document.getElementById("lencana-jenis").value = l.jenis;
+  document.getElementById("lencana-keterangan").value = l.keterangan || "";
+  document.getElementById("lencana-mulai").value = l.tanggal_mulai;
+  document.getElementById("lencana-selesai").value = l.tanggal_selesai || "";
+  aturModeForm("lencana", true, `${l.nama_panggilan} · ${LABEL_LENCANA[l.jenis] || l.jenis}`);
+}
+function selesaiEditLencana() {
+  editLencanaId = null;
+  document.getElementById("form-lencana").reset();
+  document.getElementById("lencana-mulai").value = hariIni();
+  aturModeForm("lencana", false);
+}
+document.getElementById("batal-edit-lencana").addEventListener("click", selesaiEditLencana);
+
+document.getElementById("form-lencana").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const data = {
+    member_id: Number(document.getElementById("lencana-member").value),
+    jenis: document.getElementById("lencana-jenis").value,
+    keterangan: document.getElementById("lencana-keterangan").value.trim() || null,
+    tanggal_mulai: document.getElementById("lencana-mulai").value,
+    tanggal_selesai: document.getElementById("lencana-selesai").value || null,
+  };
+  if (!data.member_id || !data.tanggal_mulai) return beriTahu("Member dan tanggal mulai wajib diisi.", "gagal");
+
+  if (data.tanggal_selesai && data.tanggal_selesai < data.tanggal_mulai)
+    return beriTahu("Tanggal selesai tidak boleh sebelum tanggal mulai.", "gagal");
+
+  jalankan(e.submitter, async () => {
+    if (editLencanaId) {
+      await panggil(`/api/lencana/${editLencanaId}`, { method: "PUT", body: data });
+      beriTahu(`Lencana ${namaMember(data.member_id)} diperbarui`);
+    } else {
+      await panggil("/api/lencana", { method: "POST", body: data });
+      beriTahu(`Lencana ${LABEL_LENCANA[data.jenis]} untuk ${namaMember(data.member_id)} disimpan`);
+    }
+    selesaiEditLencana();
+    await muatLencana();
+  });
+});
+
+document.getElementById("tabel-lencana").addEventListener("click", async (e) => {
+  const edit = e.target.closest("[data-edit-lencana]");
+  if (edit) return mulaiEditLencana(Number(edit.dataset.editLencana));
+  const akhiri = e.target.closest("[data-akhiri]");
+  const hapus = e.target.closest("[data-hapus-lencana]");
+  try {
+    if (akhiri && confirm("Akhiri jabatan ini per hari ini? Bingkai kapten di web user akan hilang.")) {
+      await panggil(`/api/lencana/${akhiri.dataset.akhiri}`, { method: "PUT", body: { tanggal_selesai: hariIni() } });
+      beriTahu("Jabatan diakhiri");
+      await muatLencana();
+    }
+    if (hapus && confirm("Hapus lencana ini? Poin 'diangkat kapten' ikut terhapus.")) {
+      await panggil(`/api/lencana/${hapus.dataset.hapusLencana}`, { method: "DELETE" });
+      if (editLencanaId === Number(hapus.dataset.hapusLencana)) selesaiEditLencana();
+      beriTahu("Lencana dihapus");
+      await muatLencana();
+    }
+  } catch (err) { beriTahu(err.message, "gagal"); }
+});
+
+// =====================================================================
+// MULAI
+// =====================================================================
+(async function mulai() {
+  try {
+    semuaMember = await panggil("/api/members");
+  } catch (err) {
+    beriTahu(err.message, "gagal");
+    return;
+  }
+  memberAktif = semuaMember.filter((m) => m.status !== "eks");
+
+  // Semua member dikirim ke pemilih; member eks disembunyikan sampai dicentang / sedang diedit
+  pemilihShow = buatPemilih(document.getElementById("pemilih-show"), semuaMember);
+  pemilihProjek = buatPemilih(document.getElementById("pemilih-projek"), semuaMember, { denganCenter: true });
+  aturKategori();
+  buatBarisSsk();
+  document.getElementById("lencana-member").innerHTML = `<option value="">Pilih member…</option>` +
+    semuaMember.map((m) => `<option value="${m.id}">${esc(m.nama_panggilan)} – ${esc(m.nama_lengkap)}</option>`).join("");
+
+  ["show-tanggal", "projek-tanggal", "ssk-tanggal", "lencana-mulai"]
+    .forEach((id) => (document.getElementById(id).value = hariIni()));
+
+  await Promise.all([muatShow(), muatProjek(), muatSsk(), muatLencana()]);
+})();
+
+// Kapten global: keterangan otomatis "JKT48" kalau masih kosong
+document.getElementById("lencana-jenis").addEventListener("change", (e) => {
+  const ket = document.getElementById("lencana-keterangan");
+  if (["kapten_global", "wakil_kapten_global"].includes(e.target.value) && !ket.value.trim()) ket.value = "JKT48";
+});

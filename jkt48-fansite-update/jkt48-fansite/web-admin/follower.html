@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Input Follower · Admin JKT48 Fan Board</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Nunito:wght@400;600;700;800&family=Zen+Maru+Gothic:wght@500;700;900&display=swap">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body data-halaman="follower">
+<div class="tata-letak">
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <main class="konten">
+    <header class="kepala-halaman">
+      <div>
+        <p class="sapaan" id="sapaan">Halo</p>
+        <h1>Input Follower</h1>
+      </div>
+    </header>
+
+    <div class="tab-baris" role="tablist" aria-label="Bagian">
+      <button type="button" role="tab" class="tab aktif" aria-selected="true" aria-controls="tab-input" id="t-input">Input cepat</button>
+      <button type="button" role="tab" class="tab" aria-selected="false" aria-controls="tab-akun" id="t-akun" tabindex="-1">Kelola akun</button>
+    </div>
+
+    <!-- ===================== INPUT CEPAT ===================== -->
+    <section role="tabpanel" id="tab-input" aria-labelledby="t-input" class="isi-tab">
+      <section class="panel">
+        <div class="alat-tabel">
+          <div class="isian-sebaris"><label for="tanggal-input">Tanggal data</label><input type="date" id="tanggal-input"></div>
+          <div class="isian-sebaris"><label for="filter-platform">Platform</label>
+            <select id="filter-platform"><option value="tiktok">TikTok</option><option value="instagram">Instagram</option><option value="">Semua</option></select></div>
+          <div class="isian-sebaris"><label for="filter-sumber">Sumber</label>
+            <select id="filter-sumber"><option value="manual">Manual saja</option><option value="">Semua</option></select></div>
+          <span class="redup kecil" id="info-input" aria-live="polite"></span>
+        </div>
+        <p class="redup kecil" style="margin:0">
+          Klik <strong>Buka ↗</strong> untuk melihat profil, ketik angkanya, lalu tekan <kbd>Enter</kbd> untuk pindah ke baris berikutnya.
+          Boleh menulis <code>1.234.567</code>, <code>850rb</code>, atau <code>1,2jt</code>. Baris yang dikosongkan tidak dikirim.
+        </p>
+
+        <div class="bungkus-tabel">
+          <table class="tabel tabel-input">
+            <thead><tr><th>Member</th><th>Akun</th><th class="kanan">Terakhir</th><th>Angka baru</th><th class="kanan">Perubahan</th></tr></thead>
+            <tbody id="tabel-input"><tr><td colspan="5" class="redup">Memuat…</td></tr></tbody>
+          </table>
+        </div>
+
+        <div class="kaki-form antara">
+          <span class="redup kecil" id="info-terisi">0 baris terisi</span>
+          <button type="button" class="tombol tombol-merah" id="tombol-simpan-semua">Simpan semua</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-kepala">
+          <h2>Tarik follower Instagram otomatis</h2>
+          <button type="button" class="tombol tombol-garis" id="tombol-tarik-ig">Tarik sekarang</button>
+        </div>
+        <p class="redup kecil" style="margin:0">Untuk akun Instagram bersumber <strong>api</strong>. Berjalan otomatis setiap Minggu 23:00 selama backend menyala. Butuh IG_USER_ID dan IG_ACCESS_TOKEN di file .env.</p>
+        <div id="hasil-tarik"></div>
+      </section>
+    </section>
+
+    <!-- ===================== KELOLA AKUN ===================== -->
+    <section role="tabpanel" id="tab-akun" aria-labelledby="t-akun" class="isi-tab" hidden>
+      <form class="panel" id="form-akun" novalidate>
+        <div class="panel-kepala"><h2>Daftarkan akun</h2><span class="redup kecil">Satu member hanya boleh punya satu akun per platform</span></div>
+        <div class="grid-form empat">
+          <div class="isian"><label for="akun-member">Member <span class="wajib">*</span></label><select id="akun-member"></select></div>
+          <div class="isian"><label for="akun-platform">Platform <span class="wajib">*</span></label>
+            <select id="akun-platform"><option value="instagram">Instagram</option><option value="tiktok">TikTok</option><option value="x">X</option><option value="youtube">YouTube</option></select></div>
+          <div class="isian"><label for="akun-username">Username <span class="wajib">*</span></label><input id="akun-username" placeholder="@username"></div>
+          <div class="isian"><label for="akun-sumber">Sumber data</label>
+            <select id="akun-sumber"><option value="manual">Manual</option><option value="api">API (IG Creator/Business)</option></select></div>
+        </div>
+        <div class="kaki-form"><button type="submit" class="tombol tombol-merah">Daftarkan</button></div>
+      </form>
+
+      <section class="panel">
+        <div class="alat-tabel">
+          <div class="kotak-cari">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+            <label for="cari-akun" class="sr-only">Cari akun</label>
+            <input type="search" id="cari-akun" placeholder="Cari member atau username…" autocomplete="off">
+          </div>
+          <span class="redup kecil" id="info-akun"></span>
+        </div>
+        <div class="bungkus-tabel">
+          <table class="tabel">
+            <thead><tr><th>Member</th><th>Platform</th><th>Username</th><th>Sumber</th><th>Aktif</th><th class="kanan">Follower terakhir</th><th class="kanan">Aksi</th></tr></thead>
+            <tbody id="tabel-akun"></tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+  </main>
+</div>
+
+<script src="js/api-admin.js"></script>
+<script src="js/layout.js"></script>
+<script src="js/follower.js"></script>
+</body>
+</html>

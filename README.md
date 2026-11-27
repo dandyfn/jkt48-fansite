@@ -267,6 +267,8 @@ Semua kode ML ada di `backend/app/ml.py`. Ada 3 model:
 </details>
 
 ---
+## 📖 halaman SRS : 
+https://docs.google.com/document/d/1RNFui6xd2YHHt9rVPIoVG4ZvavzUf4pAQnK6DuZzTco/edit?usp=sharing
 
 ## 🗺️ Rencana berikutnya
 
